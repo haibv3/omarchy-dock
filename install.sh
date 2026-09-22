@@ -4,6 +4,8 @@ set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
+
+mkdir -p "$HOME/.config/omarchy-dock"
 install -Dm755 "$SRC/omarchy-dock.sh" "$HOME/.local/bin/omarchy-dock"
 install -Dm644 "$SRC/omarchy-dock.desktop" "$HOME/.local/share/applications/omarchy-dock.desktop"
 install -Dm644 "$SRC/assets/omarchy-dock.svg" "$HOME/.local/share/icons/hicolor/scalable/apps/omarchy-dock.svg"

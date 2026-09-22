@@ -7,4 +7,5 @@ Exec=omarchy-dock
 Icon=omarchy-dock
 Categories=Utility;
 Keywords=dock;launcher;panel;
+StartupWMClass=org.quickshell
 StartupNotify=false

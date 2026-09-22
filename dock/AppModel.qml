@@ -43,17 +43,16 @@ QtObject {
         return groups;
     }
 
-    function entryForAppId(appId, groups) {
-        // exact id → lowercase id → startupClass → heuristic
+    function entryForAppId(appId) {
+        // exact id → lowercase id → StartupWMClass → heuristic
         let e = DesktopEntries.byId(appId);
         if (e)
             return e;
         e = DesktopEntries.byId(appId.toLowerCase());
         if (e)
             return e;
-        for (const id in groups) {
-            const cand = DesktopEntries.byId(id);
-            if (cand && cand.startupClass === appId)
+        for (const cand of DesktopEntries.applications.values) {
+            if (cand.startupClass && cand.startupClass === appId)
                 return cand;
         }
         e = DesktopEntries.heuristicLookup(appId);
@@ -72,7 +71,7 @@ QtObject {
             // find running group matching this entry
             let tls = [];
             for (const appId in groups) {
-                const e = entryForAppId(appId, groups);
+                const e = entryForAppId(appId);
                 if (e && e.id === entry.id) {
                     tls = groups[appId];
                     consumed[appId] = true;
@@ -96,7 +95,7 @@ QtObject {
         for (const appId in groups) {
             if (consumed[appId])
                 continue;
-            const entry = entryForAppId(appId, groups);
+            const entry = entryForAppId(appId);
             const tls = groups[appId];
             next.push({
                 desktopId: entry ? entry.id : "",

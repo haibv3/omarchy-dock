@@ -4,12 +4,10 @@ set -u
 
 DOCK_PATH="${OMARCHY_DOCK_PATH:-$HOME/Workspace/omarchy-dock}"
 
-# Find a running dock instance (launched with -p DOCK_PATH) and toggle settings.
-for pid in $(pgrep -f "quickshell -p ${DOCK_PATH}" 2>/dev/null); do
-    if quickshell ipc --pid "$pid" call dock toggleSettings 2>/dev/null; then
-        exit 0
-    fi
-done
+# If a dock instance for this config is running, toggle its settings window.
+if quickshell ipc -p "$DOCK_PATH" call dock toggleSettings 2>/dev/null; then
+    exit 0
+fi
 
 # Not running → start it.
 exec quickshell -p "$DOCK_PATH"

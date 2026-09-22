@@ -76,6 +76,12 @@ Singleton {
         pinned = ids;
     }
 
+    // ensure ~/.config/omarchy-dock exists before first write
+    Process {
+        command: ["mkdir", "-p", Quickshell.env("HOME") + "/.config/omarchy-dock"]
+        running: true
+    }
+
     FileView {
         id: fileView
         path: root.configPath
@@ -101,5 +107,6 @@ Singleton {
             root._loaded = true;
             root.save();
         }
+        onSaveFailed: console.warn("omarchy-dock: failed to write config.json")
     }
 }

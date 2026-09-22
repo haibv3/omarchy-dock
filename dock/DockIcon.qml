@@ -16,8 +16,10 @@ Item {
     required property int index
     property int iconSize: Config.iconSize
     property bool vertical: false     // dock on left/right edge
-    property bool dragging: false
+    property bool dragging: false     // bound by parent for visual state
+    property bool _dragging: false    // internal press-drag state
     property bool _dragged: false
+    property point _pressPos: Qt.point(0, 0)
     signal clicked()
     signal rightClicked(point pos)
     signal dragMoved(real pos)        // cursor position along dock axis
@@ -93,6 +95,10 @@ Item {
         hoverEnabled: true
         acceptedButtons: Qt.LeftButton | Qt.RightButton
 
+        onPressed: {
+            root._pressPos = Qt.point(mouseX, mouseY);
+            root._dragged = false;
+        }
         onClicked: btn => {
             if (root._dragged) {
                 root._dragged = false;
@@ -104,14 +110,18 @@ Item {
                 root.clicked();
         }
         onPositionChanged: {
-            if (pressed && root.pinned) {
-                root.dragging = true;
-                root.dragMoved(root.vertical ? mouse.mouseY : mouse.mouseX);
-            }
+            if (!pressed || !root.pinned)
+                return;
+            const axis = root.vertical ? mouseY - root._pressPos.y
+                                       : mouseX - root._pressPos.x;
+            if (!root._dragging && Math.abs(axis) < 8)
+                return; // drag threshold
+            root._dragging = true;
+            root.dragMoved(root.vertical ? mouse.mouseY : mouse.mouseX);
         }
         onReleased: {
-            if (root.dragging) {
-                root.dragging = false;
+            if (root._dragging) {
+                root._dragging = false;
                 root._dragged = true;
                 root.dragEnded();
             }
