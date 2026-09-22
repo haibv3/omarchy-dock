@@ -7,16 +7,20 @@ import "../services"
 FloatingWindow {
     id: win
 
+    required property var config
+    required property var theme
+    required property var globals
+
     title: "Omarchy Dock Settings"
-    visible: Globals.settingsOpen
+    visible: globals.settingsOpen
     onVisibleChanged: {
-        if (!visible && Globals.settingsOpen)
-            Globals.closeSettings();
+        if (!visible && globals.settingsOpen)
+            globals.closeSettings();
     }
     implicitWidth: 420
     implicitHeight: 480
     minimumSize: Qt.size(360, 400)
-    color: Theme.background
+    color: theme.background
 
     ColumnLayout {
         anchors.fill: parent
@@ -25,7 +29,7 @@ FloatingWindow {
 
         Text {
             text: "Dock"
-            color: Theme.foreground
+            color: theme.foreground
             font.pixelSize: 18
             font.bold: true
         }
@@ -33,28 +37,28 @@ FloatingWindow {
         // ---- position ----
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Position"; color: Theme.foreground; Layout.fillWidth: true }
+            Text { text: "Position"; color: theme.foreground; Layout.fillWidth: true }
             ComboBox {
                 model: ["top", "bottom", "left", "right"]
-                currentIndex: model.indexOf(Config.position)
-                onActivated: Config.position = model[currentIndex]
+                currentIndex: model.indexOf(config.position)
+                onActivated: config.position = model[currentIndex]
             }
         }
 
         // ---- icon size ----
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Icon size"; color: Theme.foreground; Layout.fillWidth: true }
+            Text { text: "Icon size"; color: theme.foreground; Layout.fillWidth: true }
             Slider {
                 id: sizeSlider
                 from: 24; to: 96; stepSize: 4
-                value: Config.iconSize
+                value: config.iconSize
                 Layout.preferredWidth: 160
-                onMoved: Config.iconSize = value
+                onMoved: config.iconSize = value
             }
             Text {
-                text: Config.iconSize + "px"
-                color: Theme.darkForeground
+                text: config.iconSize + "px"
+                color: theme.darkForeground
                 Layout.preferredWidth: 42
             }
         }
@@ -62,7 +66,7 @@ FloatingWindow {
         // ---- autohide ----
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Auto-hide"; color: Theme.foreground; Layout.fillWidth: true }
+            Text { text: "Auto-hide"; color: theme.foreground; Layout.fillWidth: true }
             ComboBox {
                 model: ListModel {
                     ListElement { label: "Never"; value: "never" }
@@ -71,28 +75,28 @@ FloatingWindow {
                 }
                 textRole: "label"
                 valueRole: "value"
-                currentIndex: Math.max(0, ["never","timer","intellihide"].indexOf(Config.autohide))
-                onActivated: Config.autohide = currentValue
+                currentIndex: Math.max(0, ["never","timer","intellihide"].indexOf(config.autohide))
+                onActivated: config.autohide = currentValue
             }
         }
 
         // ---- hide delay ----
         RowLayout {
             Layout.fillWidth: true
-            visible: Config.autohide !== "never"
-            Text { text: "Hide delay"; color: Theme.foreground; Layout.fillWidth: true }
+            visible: config.autohide !== "never"
+            Text { text: "Hide delay"; color: theme.foreground; Layout.fillWidth: true }
             SpinBox {
                 from: 0; to: 3000; stepSize: 100
-                value: Config.hideDelay
-                onValueModified: Config.hideDelay = value
+                value: config.hideDelay
+                onValueModified: config.hideDelay = value
             }
-            Text { text: "ms"; color: Theme.darkForeground }
+            Text { text: "ms"; color: theme.darkForeground }
         }
 
         // ---- monitor ----
         RowLayout {
             Layout.fillWidth: true
-            Text { text: "Monitor"; color: Theme.foreground; Layout.fillWidth: true }
+            Text { text: "Monitor"; color: theme.foreground; Layout.fillWidth: true }
             ComboBox {
                 model: {
                     const names = ["all"];
@@ -100,17 +104,17 @@ FloatingWindow {
                         names.push(s.name);
                     return names;
                 }
-                currentIndex: Math.max(0, model.indexOf(Config.monitor))
-                onActivated: Config.monitor = model[currentIndex]
+                currentIndex: Math.max(0, model.indexOf(config.monitor))
+                onActivated: config.monitor = model[currentIndex]
             }
         }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: Theme.muted; opacity: 0.4 }
+        Rectangle { Layout.fillWidth: true; height: 1; color: theme.muted; opacity: 0.4 }
 
         // ---- pinned apps ----
         Text {
             text: "Pinned apps"
-            color: Theme.foreground
+            color: theme.foreground
             font.pixelSize: 14
             font.bold: true
         }
@@ -120,7 +124,7 @@ FloatingWindow {
             Layout.fillWidth: true
             Layout.fillHeight: true
             clip: true
-            model: Config.pinned
+            model: config.pinned
             spacing: 2
             delegate: Rectangle {
                 required property string modelData
@@ -128,7 +132,7 @@ FloatingWindow {
                 width: pinList.width
                 height: 32
                 radius: 6
-                color: pinMa.containsMouse ? Theme.lighterBackground : "transparent"
+                color: pinMa.containsMouse ? theme.lighterBackground : "transparent"
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
@@ -139,17 +143,17 @@ FloatingWindow {
                             const e = DesktopEntries.byId(modelData);
                             return e ? e.name : modelData;
                         }
-                        color: Theme.foreground
+                        color: theme.foreground
                         elide: Text.ElideRight
                     }
                     Text {
                         text: "✕"
-                        color: Theme.red
+                        color: theme.red
                         MouseArea {
                             id: pinMa
                             anchors.fill: parent
                             hoverEnabled: true
-                            onClicked: Config.unpin(modelData)
+                            onClicked: config.unpin(modelData)
                         }
                     }
                 }
@@ -164,11 +168,11 @@ FloatingWindow {
                 id: filter
                 Layout.fillWidth: true
                 placeholderText: "Filter applications…"
-                color: Theme.foreground
+                color: theme.foreground
                 background: Rectangle {
-                    color: Theme.darkerBackground
+                    color: theme.darkerBackground
                     radius: 6
-                    border.color: Theme.muted
+                    border.color: theme.muted
                 }
             }
         }
@@ -194,14 +198,14 @@ FloatingWindow {
                 width: parent.width
                 height: 30
                 radius: 6
-                color: addMa.containsMouse ? Theme.lighterBackground : "transparent"
+                color: addMa.containsMouse ? theme.lighterBackground : "transparent"
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 8
                     Text {
                         Layout.fillWidth: true
-                        text: modelData.name + (Config.isPinned(modelData.id) ? "  (pinned)" : "")
-                        color: Config.isPinned(modelData.id) ? Theme.muted : Theme.foreground
+                        text: modelData.name + (config.isPinned(modelData.id) ? "  (pinned)" : "")
+                        color: config.isPinned(modelData.id) ? theme.muted : theme.foreground
                         elide: Text.ElideRight
                     }
                 }
@@ -209,8 +213,8 @@ FloatingWindow {
                     id: addMa
                     anchors.fill: parent
                     hoverEnabled: true
-                    enabled: !Config.isPinned(modelData.id)
-                    onClicked: Config.pin(modelData.id)
+                    enabled: !config.isPinned(modelData.id)
+                    onClicked: config.pin(modelData.id)
                 }
             }
         }

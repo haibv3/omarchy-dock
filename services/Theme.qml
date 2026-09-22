@@ -1,4 +1,3 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -6,7 +5,7 @@ import Quickshell.Io
 // Reads the active Omarchy theme's colors.toml.
 // ~/.local/state/omarchy/current/theme is a symlink that gets retargeted on
 // theme-set, so we watch theme.name (a regular file) and re-resolve the path.
-Singleton {
+QtObject {
     id: root
 
     readonly property string stateDir: Quickshell.env("HOME") + "/.local/state/omarchy/current"
@@ -49,7 +48,7 @@ Singleton {
 
     // theme.name changes on every theme-set → force colors.toml reload by
     // retoggling the path (the symlink target may have changed inode).
-    FileView {
+    property FileView nameFile: FileView {
         id: nameFile
         path: root.stateDir + "/theme.name"
         watchChanges: true
@@ -61,7 +60,7 @@ Singleton {
         onFileChanged: nameFile.reload()
     }
 
-    FileView {
+    property FileView colorsFile: FileView {
         id: colorsFile
         path: root.colorsPath
         watchChanges: true

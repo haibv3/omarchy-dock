@@ -1,0 +1,13 @@
+{
+  "schemaVersion": 1,
+  "id": "haibv3.omarchy-dock",
+  "name": "Omarchy Dock",
+  "version": "1.0.0",
+  "author": "HaiBachVan",
+  "description": "macOS/Ubuntu-style dock: pinned + running apps, autohide/intellihide, per-edge placement, Omarchy theme sync.",
+  "kinds": ["panel"],
+  "keepLoaded": true,
+  "entryPoints": {
+    "panel": "PluginEntry.qml"
+  }
+}

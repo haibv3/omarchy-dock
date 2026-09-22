@@ -4,10 +4,14 @@ set -u
 
 DOCK_PATH="${OMARCHY_DOCK_PATH:-$HOME/Workspace/omarchy-dock}"
 
-# If a dock instance for this config is running, toggle its settings window.
-if quickshell ipc -p "$DOCK_PATH" call dock toggleSettings 2>/dev/null; then
+# Plugin mode: dock lives inside omarchy-shell → toggle via omarchy-shell IPC.
+if command -v omarchy-shell >/dev/null 2>&1 \
+    && omarchy-shell dock toggleSettings 2>/dev/null; then
     exit 0
 fi
 
-# Not running → start it.
+# Standalone mode: toggle settings on a running instance, else start it.
+if quickshell ipc -p "$DOCK_PATH" call dock toggleSettings 2>/dev/null; then
+    exit 0
+fi
 exec quickshell -p "$DOCK_PATH"

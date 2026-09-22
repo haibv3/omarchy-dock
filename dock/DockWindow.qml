@@ -9,22 +9,28 @@ PanelWindow {
     id: win
 
     required property ShellScreen modelData
+    required property var config
+    required property var theme
+    required property var hyprClients
+    required property var globals
 
-    readonly property string edge: Config.position          // top|bottom|left|right
+    readonly property string edge: config.position          // top|bottom|left|right
     readonly property bool vertical: edge === "left" || edge === "right"
     readonly property int strip: 4
-    readonly property int thickness: Config.iconSize + Config.margin * 2 + 6
+    readonly property int thickness: config.iconSize + config.margin * 2 + 6
 
     // ---- visibility state ----
+    // plugin summon: pin the dock open regardless of autohide mode
+    property bool forceVisible: false
     readonly property bool hovered: stripHover.hovered || surfaceHover.hovered
-    readonly property bool edgeBusy: Config.autohide === "intellihide"
-        && HyprClients.edgeOccupied(modelData.name, edge, thickness + 8)
+    readonly property bool edgeBusy: config.autohide === "intellihide"
+        && hyprClients.edgeOccupied(modelData.name, edge, thickness + 8)
     readonly property bool wantHide: {
-        if (Config.autohide === "never")
+        if (config.autohide === "never" || forceVisible)
             return false;
         if (hovered || menuOpen)
             return false;
-        if (Config.autohide === "intellihide")
+        if (config.autohide === "intellihide")
             return edgeBusy;
         return true; // "timer": hide whenever not hovered
     }
@@ -42,7 +48,7 @@ PanelWindow {
 
     Timer {
         id: hideTimer
-        interval: Config.hideDelay
+        interval: config.hideDelay
         onTriggered: win.hidden = true
     }
 
@@ -82,7 +88,7 @@ PanelWindow {
 
         Rectangle {
             anchors.fill: parent
-            color: Theme.accent
+            color: theme.accent
             opacity: win.hidden && stripHover.hovered ? 0.6 : 0.0
         }
 
@@ -97,10 +103,10 @@ PanelWindow {
 
         Rectangle {
             id: pill
-            color: Qt.rgba(Theme.darkerBackground.r, Theme.darkerBackground.g,
-                           Theme.darkerBackground.b, 0.92)
+            color: Qt.rgba(theme.darkerBackground.r, theme.darkerBackground.g,
+                           theme.darkerBackground.b, 0.92)
             radius: 14
-            border.color: Theme.muted
+            border.color: theme.muted
             border.width: 1
 
             // centered on the free axis, hugging the anchored edge
@@ -124,9 +130,15 @@ PanelWindow {
             DockView {
                 id: dockView
                 anchors.centerIn: parent
-                appModel: AppModel { monitorName: win.modelData.name }
+                appModel: AppModel {
+                    monitorName: win.modelData.name
+                    config: win.config
+                }
                 vertical: win.vertical
                 dockWindow: win
+                config: win.config
+                theme: win.theme
+                globals: win.globals
             }
         }
 

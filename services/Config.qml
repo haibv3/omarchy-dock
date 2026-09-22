@@ -1,9 +1,8 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
 
-Singleton {
+QtObject {
     id: root
 
     readonly property string configPath: Quickshell.env("HOME") + "/.config/omarchy-dock/config.json"
@@ -77,12 +76,12 @@ Singleton {
     }
 
     // ensure ~/.config/omarchy-dock exists before first write
-    Process {
+    property Process _mkdir: Process {
         command: ["mkdir", "-p", Quickshell.env("HOME") + "/.config/omarchy-dock"]
         running: true
     }
 
-    FileView {
+    property FileView fileView: FileView {
         id: fileView
         path: root.configPath
         watchChanges: true

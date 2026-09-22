@@ -47,6 +47,22 @@ Installs `omarchy-dock` into `~/.local/bin`, a `.desktop` entry into
 "Omarchy Dock" then appears in your app launcher — clicking it opens the
 dock settings window (or starts the dock if it isn't running).
 
+## Omarchy shell plugin (phase 2)
+
+```bash
+./install.sh --plugin
+```
+
+Copies the dock into `~/.config/omarchy/plugins/haibv3.omarchy-dock` and
+enables it. The dock then runs inside `omarchy-shell` — no extra process.
+
+- Summon/hide: `omarchy-shell shell summon haibv3.omarchy-dock` /
+  `omarchy-shell shell hide haibv3.omarchy-dock` (summon pins the dock
+  visible; hide resumes autohide).
+- Settings: `omarchy-shell dock toggleSettings` or the app-menu entry.
+- **Caveat:** `keepLoaded` plugins are not replaced on hot-reload — code
+  changes need `omarchy restart shell`.
+
 ## Config
 
 `~/.config/omarchy-dock/config.json` — created on first run, hot-reloaded:

@@ -14,7 +14,9 @@ Item {
     required property bool urgent
     required property bool pinned
     required property int index
-    property int iconSize: Config.iconSize
+    required property var config
+    required property var theme
+    property int iconSize: config.iconSize
     property bool vertical: false     // dock on left/right edge
     property bool dragging: false     // bound by parent for visual state
     property bool _dragging: false    // internal press-drag state
@@ -25,8 +27,8 @@ Item {
     signal dragMoved(real pos)        // cursor position along dock axis
     signal dragEnded()
 
-    width: vertical ? parent.width : iconSize + Config.spacing
-    height: vertical ? iconSize + Config.spacing : parent.height
+    width: vertical ? parent.width : iconSize + config.spacing
+    height: vertical ? iconSize + config.spacing : parent.height
 
     readonly property string iconSource: {
         const icon = root.icon;
@@ -44,9 +46,9 @@ Item {
         width: root.iconSize
         height: root.iconSize
         radius: 10
-        color: mouse.containsMouse ? Theme.lighterBackground : "transparent"
+        color: mouse.containsMouse ? theme.lighterBackground : "transparent"
         border.width: root.urgent ? 2 : 0
-        border.color: Theme.red
+        border.color: theme.red
 
         Image {
             id: img
@@ -66,7 +68,7 @@ Item {
             anchors.centerIn: parent
             visible: img.status === Image.Error || img.status === Image.Null
             text: root.name.length ? root.name[0].toUpperCase() : "?"
-            color: Theme.foreground
+            color: theme.foreground
             font.pixelSize: root.iconSize * 0.4
             font.bold: true
         }
@@ -77,7 +79,7 @@ Item {
             width: 5
             height: 5
             radius: 2.5
-            color: root.urgent ? Theme.red : Theme.accent
+            color: root.urgent ? theme.red : theme.accent
             anchors {
                 horizontalCenter: root.vertical ? undefined : parent.horizontalCenter
                 verticalCenter: root.vertical ? parent.verticalCenter : undefined

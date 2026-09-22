@@ -11,6 +11,7 @@ QtObject {
 
     // ShellScreen name this model serves ("" = all monitors merged).
     property string monitorName: ""
+    required property var config
 
     readonly property ListModel model: ListModel {}
 
@@ -60,11 +61,13 @@ QtObject {
     }
 
     function rebuild() {
+        if (!config)
+            return;
         const groups = runningByApp();
         const consumed = {}; // appId already represented by a pinned row
         const next = [];
 
-        for (const desktopId of Config.pinned) {
+        for (const desktopId of config.pinned) {
             const entry = DesktopEntries.byId(desktopId);
             if (!entry)
                 continue;
@@ -146,7 +149,7 @@ QtObject {
         }
     }
     property Connections _c2: Connections {
-        target: Config
+        target: root.config
         function onPinnedChanged() {
             root.rebuild();
         }

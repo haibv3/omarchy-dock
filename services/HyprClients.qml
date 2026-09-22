@@ -1,4 +1,3 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
@@ -6,7 +5,7 @@ import Quickshell.Hyprland
 
 // Geometry source for intellihide. HyprlandToplevel lacks x/y/w/h, so we poll
 // `hyprctl clients -j` debounced off the Hyprland event stream.
-Singleton {
+QtObject {
     id: root
 
     // address -> {x, y, w, h, monitor, workspace, fullscreen, hidden}
@@ -77,7 +76,7 @@ Singleton {
         return false;
     }
 
-    Process {
+    property Process proc: Process {
         id: proc
         command: ["hyprctl", "clients", "-j"]
         stdout: StdioCollector {
@@ -91,13 +90,13 @@ Singleton {
         }
     }
 
-    Timer {
+    property Timer debounce: Timer {
         id: debounce
         interval: 120
         onTriggered: root.refresh()
     }
 
-    Connections {
+    property Connections _conn: Connections {
         target: Hyprland
         function onRawEvent(event) {
             debounce.restart();

@@ -7,15 +7,18 @@ Item {
     id: root
 
     required property var appModel    // AppModel
+    required property var config
+    required property var theme
+    required property var globals
     property bool vertical: false
     property var dockWindow: null     // PanelWindow, for menu anchoring
     readonly property bool menuOpen: menu.visible
 
 
-    implicitWidth: vertical ? Config.iconSize + Config.margin * 2
-                          : view.contentWidth + Config.margin * 2
-    implicitHeight: vertical ? view.contentHeight + Config.margin * 2
-                             : Config.iconSize + Config.margin * 2
+    implicitWidth: vertical ? config.iconSize + config.margin * 2
+                          : view.contentWidth + config.margin * 2
+    implicitHeight: vertical ? view.contentHeight + config.margin * 2
+                             : config.iconSize + config.margin * 2
 
     // manual reorder state
     property int dragIndex: -1
@@ -27,13 +30,13 @@ Item {
             if (row.pinned)
                 ids.push(row.desktopId);
         }
-        Config.setPinnedOrder(ids);
+        config.setPinnedOrder(ids);
     }
 
     ListView {
         id: view
         anchors.fill: parent
-        anchors.margins: Config.margin
+        anchors.margins: config.margin
         orientation: root.vertical ? ListView.Vertical : ListView.Horizontal
         model: root.appModel.model
         spacing: 0
@@ -45,6 +48,8 @@ Item {
         }
 
         delegate: DockIcon {
+            config: root.config
+            theme: root.theme
             vertical: root.vertical
             dragging: root.dragIndex === index
 
@@ -89,5 +94,8 @@ Item {
 
     ContextMenu {
         id: menu
+        config: root.config
+        theme: root.theme
+        globals: root.globals
     }
 }

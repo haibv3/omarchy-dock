@@ -1,9 +1,8 @@
-pragma Singleton
 import QtQuick
 import Quickshell
 import Quickshell.Io
 
-Singleton {
+QtObject {
     id: root
     property bool settingsOpen: false
 
@@ -14,7 +13,7 @@ Singleton {
         settingsOpen = false;
     }
 
-    IpcHandler {
+    property IpcHandler _ipc: IpcHandler {
         target: "dock"
         function toggleSettings() {
             root.settingsOpen = !root.settingsOpen;

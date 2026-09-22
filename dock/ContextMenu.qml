@@ -7,6 +7,9 @@ PopupWindow {
     id: root
 
     property var row: null            // AppModel row
+    required property var config
+    required property var theme
+    required property var globals
     signal menuClosed()
 
     anchor.rect: Qt.rect(0, 0, 1, 1)
@@ -34,8 +37,8 @@ PopupWindow {
     Rectangle {
         anchors.fill: parent
         radius: 8
-        color: Theme.darkerBackground
-        border.color: Theme.muted
+        color: theme.darkerBackground
+        border.color: theme.muted
         border.width: 1
 
         Column {
@@ -51,7 +54,7 @@ PopupWindow {
                     required property int index
                     width: menuCol.width
                     height: 28
-                    color: winMa.containsMouse ? Theme.lighterBackground : "transparent"
+                    color: winMa.containsMouse ? theme.lighterBackground : "transparent"
                     radius: 4
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
@@ -60,7 +63,7 @@ PopupWindow {
                         width: parent.width - 20
                         elide: Text.ElideRight
                         text: modelData.title || "(untitled)"
-                        color: Theme.foreground
+                        color: theme.foreground
                         font.pixelSize: 12
                     }
                     MouseArea {
@@ -80,7 +83,7 @@ PopupWindow {
                 visible: root.row && root.row.toplevels.length > 0
                 width: menuCol.width
                 height: 1
-                color: Theme.muted
+                color: theme.muted
                 opacity: 0.4
             }
 
@@ -88,7 +91,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: pinMa.containsMouse ? Theme.lighterBackground : "transparent"
+                color: pinMa.containsMouse ? theme.lighterBackground : "transparent"
                 radius: 4
                 visible: root.row && root.row.desktopId !== ""
                 Text {
@@ -96,7 +99,7 @@ PopupWindow {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     text: root.row && root.row.pinned ? "Unpin from dock" : "Pin to dock"
-                    color: Theme.foreground
+                    color: theme.foreground
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -105,9 +108,9 @@ PopupWindow {
                     hoverEnabled: true
                     onClicked: {
                         if (root.row.pinned)
-                            Config.unpin(root.row.desktopId);
+                            config.unpin(root.row.desktopId);
                         else
-                            Config.pin(root.row.desktopId);
+                            config.pin(root.row.desktopId);
                         root.visible = false;
                     }
                 }
@@ -117,7 +120,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: closeMa.containsMouse ? Theme.lighterBackground : "transparent"
+                color: closeMa.containsMouse ? theme.lighterBackground : "transparent"
                 radius: 4
                 visible: root.row && root.row.running
                 Text {
@@ -125,7 +128,7 @@ PopupWindow {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     text: root.row && root.row.toplevels.length > 1 ? "Close all windows" : "Close window"
-                    color: Theme.red
+                    color: theme.red
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -145,7 +148,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 1
-                color: Theme.muted
+                color: theme.muted
                 opacity: 0.4
             }
 
@@ -153,14 +156,14 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: setMa.containsMouse ? Theme.lighterBackground : "transparent"
+                color: setMa.containsMouse ? theme.lighterBackground : "transparent"
                 radius: 4
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     text: "Dock settings…"
-                    color: Theme.foreground
+                    color: theme.foreground
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -168,7 +171,7 @@ PopupWindow {
                     anchors.fill: parent
                     hoverEnabled: true
                     onClicked: {
-                        Globals.openSettings();
+                        globals.openSettings();
                         root.visible = false;
                     }
                 }
