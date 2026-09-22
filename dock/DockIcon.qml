@@ -27,8 +27,10 @@ Item {
     signal dragMoved(real pos)        // cursor position along dock axis
     signal dragEnded()
 
-    width: vertical ? parent.width : iconSize + config.spacing
-    height: vertical ? iconSize + config.spacing : parent.height
+    width: vertical ? (parent ? parent.width : iconSize + config.spacing)
+                    : iconSize + config.spacing
+    height: vertical ? iconSize + config.spacing
+                     : (parent ? parent.height : iconSize + config.spacing)
 
     readonly property string iconSource: {
         const icon = root.icon;

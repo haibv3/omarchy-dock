@@ -1,8 +1,8 @@
 import QtQuick
-import QtQuick.Controls
 import QtQuick.Layouts
 import Quickshell
 import "../services"
+import "../ui"
 
 FloatingWindow {
     id: win
@@ -17,205 +17,332 @@ FloatingWindow {
         if (!visible && globals.settingsOpen)
             globals.closeSettings();
     }
-    implicitWidth: 420
-    implicitHeight: 480
-    minimumSize: Qt.size(360, 400)
+    implicitWidth: 460
+    implicitHeight: 620
+    minimumSize: Qt.size(400, 480)
     color: theme.background
 
-    ColumnLayout {
+    component SectionLabel: Text {
+        property string label: ""
+        text: label
+        color: theme.darkForeground
+        font.pixelSize: 11
+        font.bold: true
+        font.letterSpacing: 1.2
+    }
+
+    component RowLabel: Text {
+        property string label: ""
+        text: label
+        color: theme.foreground
+        font.pixelSize: 13
+    }
+
+    Flickable {
         anchors.fill: parent
-        anchors.margins: 16
-        spacing: 12
+        contentHeight: col.implicitHeight
+        clip: true
 
-        Text {
-            text: "Dock"
-            color: theme.foreground
-            font.pixelSize: 18
-            font.bold: true
-        }
+        ColumnLayout {
+            id: col
+            width: parent.width
+            spacing: 0
 
-        // ---- position ----
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Position"; color: theme.foreground; Layout.fillWidth: true }
-            ComboBox {
-                model: ["top", "bottom", "left", "right"]
-                currentIndex: model.indexOf(config.position)
-                onActivated: config.position = model[currentIndex]
-            }
-        }
-
-        // ---- icon size ----
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Icon size"; color: theme.foreground; Layout.fillWidth: true }
-            Slider {
-                id: sizeSlider
-                from: 24; to: 96; stepSize: 4
-                value: config.iconSize
-                Layout.preferredWidth: 160
-                onMoved: config.iconSize = value
-            }
-            Text {
-                text: config.iconSize + "px"
-                color: theme.darkForeground
-                Layout.preferredWidth: 42
-            }
-        }
-
-        // ---- autohide ----
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Auto-hide"; color: theme.foreground; Layout.fillWidth: true }
-            ComboBox {
-                model: ListModel {
-                    ListElement { label: "Never"; value: "never" }
-                    ListElement { label: "After delay"; value: "timer" }
-                    ListElement { label: "When window near (intellihide)"; value: "intellihide" }
+            // ---------- header ----------
+            RowLayout {
+                Layout.fillWidth: true
+                Layout.margins: 20
+                Layout.bottomMargin: 8
+                Text {
+                    Layout.fillWidth: true
+                    text: "Dock"
+                    color: theme.foreground
+                    font.pixelSize: 20
+                    font.bold: true
                 }
-                textRole: "label"
-                valueRole: "value"
-                currentIndex: Math.max(0, ["never","timer","intellihide"].indexOf(config.autohide))
-                onActivated: config.autohide = currentValue
-            }
-        }
-
-        // ---- hide delay ----
-        RowLayout {
-            Layout.fillWidth: true
-            visible: config.autohide !== "never"
-            Text { text: "Hide delay"; color: theme.foreground; Layout.fillWidth: true }
-            SpinBox {
-                from: 0; to: 3000; stepSize: 100
-                value: config.hideDelay
-                onValueModified: config.hideDelay = value
-            }
-            Text { text: "ms"; color: theme.darkForeground }
-        }
-
-        // ---- monitor ----
-        RowLayout {
-            Layout.fillWidth: true
-            Text { text: "Monitor"; color: theme.foreground; Layout.fillWidth: true }
-            ComboBox {
-                model: {
-                    const names = ["all"];
-                    for (const s of Quickshell.screens)
-                        names.push(s.name);
-                    return names;
+                DButton {
+                    theme: win.theme
+                    text: "✕"
+                    onClicked: globals.closeSettings()
                 }
-                currentIndex: Math.max(0, model.indexOf(config.monitor))
-                onActivated: config.monitor = model[currentIndex]
             }
-        }
 
-        Rectangle { Layout.fillWidth: true; height: 1; color: theme.muted; opacity: 0.4 }
+            // ---------- appearance ----------
+            SectionLabel {
+                label: "APPEARANCE"
+                Layout.leftMargin: 20
+                Layout.topMargin: 8
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.margins: 20
+                Layout.topMargin: 8
+                spacing: 14
 
-        // ---- pinned apps ----
-        Text {
-            text: "Pinned apps"
-            color: theme.foreground
-            font.pixelSize: 14
-            font.bold: true
-        }
-
-        ListView {
-            id: pinList
-            Layout.fillWidth: true
-            Layout.fillHeight: true
-            clip: true
-            model: config.pinned
-            spacing: 2
-            delegate: Rectangle {
-                required property string modelData
-                required property int index
-                width: pinList.width
-                height: 32
-                radius: 6
-                color: pinMa.containsMouse ? theme.lighterBackground : "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    anchors.rightMargin: 8
-                    Text {
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    RowLabel { label: "Position" }
+                    DSegmented {
+                        theme: win.theme
                         Layout.fillWidth: true
-                        text: {
-                            const e = DesktopEntries.byId(modelData);
-                            return e ? e.name : modelData;
-                        }
-                        color: theme.foreground
-                        elide: Text.ElideRight
+                        options: [
+                            { label: "Top", value: "top" },
+                            { label: "Bottom", value: "bottom" },
+                            { label: "Left", value: "left" },
+                            { label: "Right", value: "right" }
+                        ]
+                        currentValue: config.position
+                        onSelected: v => config.position = v
                     }
-                    Text {
-                        text: "✕"
-                        color: theme.red
+                }
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    RowLayout {
+                        Layout.fillWidth: true
+                        RowLabel { label: "Icon size"; Layout.fillWidth: true }
+                        Text {
+                            text: config.iconSize + " px"
+                            color: theme.darkForeground
+                            font.pixelSize: 12
+                        }
+                    }
+                    DSlider {
+                        theme: win.theme
+                        Layout.fillWidth: true
+                        from: 24; to: 96; stepSize: 4
+                        value: config.iconSize
+                        onMoved: v => config.iconSize = v
+                    }
+                }
+            }
+
+            // ---------- behavior ----------
+            SectionLabel {
+                label: "BEHAVIOR"
+                Layout.leftMargin: 20
+                Layout.topMargin: 16
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.margins: 20
+                Layout.topMargin: 8
+                spacing: 14
+
+                ColumnLayout {
+                    Layout.fillWidth: true
+                    spacing: 6
+                    RowLabel { label: "Auto-hide" }
+                    DSegmented {
+                        theme: win.theme
+                        Layout.fillWidth: true
+                        options: [
+                            { label: "Never", value: "never" },
+                            { label: "After delay", value: "timer" },
+                            { label: "Intellihide", value: "intellihide" }
+                        ]
+                        currentValue: config.autohide
+                        onSelected: v => config.autohide = v
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    visible: config.autohide !== "never"
+                    RowLabel { label: "Hide delay"; Layout.fillWidth: true }
+                    DSpinBox {
+                        theme: win.theme
+                        from: 0; to: 3000; stepSize: 100
+                        value: config.hideDelay
+                        suffix: " ms"
+                        onValueModified: v => config.hideDelay = v
+                    }
+                }
+
+                RowLayout {
+                    Layout.fillWidth: true
+                    RowLabel { label: "Monitor"; Layout.fillWidth: true }
+                    DCombo {
+                        theme: win.theme
+                        Layout.preferredWidth: 180
+                        model: {
+                            const out = [{ label: "All monitors", value: "all" }];
+                            for (const s of Quickshell.screens)
+                                out.push({ label: s.name, value: s.name });
+                            return out;
+                        }
+                        currentValue: config.monitor
+                        onSelected: v => config.monitor = v
+                    }
+                }
+            }
+
+            // ---------- pinned apps ----------
+            SectionLabel {
+                label: "PINNED APPS"
+                Layout.leftMargin: 20
+                Layout.topMargin: 16
+            }
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.margins: 20
+                Layout.topMargin: 8
+                spacing: 8
+
+                // current pins
+                Repeater {
+                    model: config.pinned
+                    delegate: Rectangle {
+                        required property string modelData
+                        required property int index
+                        Layout.fillWidth: true
+                        height: 36
+                        radius: 8
+                        color: pinMa.containsMouse ? theme.lighterBackground
+                                                   : theme.darkerBackground
+                        RowLayout {
+                            anchors.fill: parent
+                            anchors.leftMargin: 10
+                            anchors.rightMargin: 6
+                            spacing: 10
+                            Image {
+                                Layout.preferredWidth: 22
+                                Layout.preferredHeight: 22
+                                source: {
+                                    const e = DesktopEntries.byId(modelData);
+                                    if (!e || !e.icon)
+                                        return "";
+                                    const p = Quickshell.iconPath(e.icon);
+                                    if (!p) return "";
+                                    return p.indexOf("://") !== -1 ? p : "file://" + p;
+                                }
+                                fillMode: Image.PreserveAspectFit
+                            }
+                            Text {
+                                Layout.fillWidth: true
+                                text: {
+                                    const e = DesktopEntries.byId(modelData);
+                                    return e ? e.name : modelData;
+                                }
+                                color: theme.foreground
+                                font.pixelSize: 13
+                                elide: Text.ElideRight
+                            }
+                            Text {
+                                text: "✕"
+                                color: pinMa.containsMouse ? theme.red
+                                                           : theme.darkForeground
+                                font.pixelSize: 13
+                            }
+                        }
                         MouseArea {
                             id: pinMa
                             anchors.fill: parent
                             hoverEnabled: true
+                            cursorShape: Qt.PointingHandCursor
                             onClicked: config.unpin(modelData)
                         }
                     }
                 }
-            }
-        }
 
-        // add app
-        RowLayout {
-            Layout.fillWidth: true
-            spacing: 8
-            TextField {
-                id: filter
-                Layout.fillWidth: true
-                placeholderText: "Filter applications…"
-                color: theme.foreground
-                background: Rectangle {
+                Text {
+                    visible: config.pinned.length === 0
+                    text: "No pinned apps — add some below."
+                    color: theme.muted
+                    font.pixelSize: 12
+                }
+
+                DField {
+                    id: filter
+                    theme: win.theme
+                    Layout.fillWidth: true
+                    placeholder: "Search applications…"
+                }
+
+                // app picker
+                Rectangle {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: 180
+                    radius: 9
                     color: theme.darkerBackground
-                    radius: 6
-                    border.color: theme.muted
-                }
-            }
-        }
-        ListView {
-            Layout.fillWidth: true
-            Layout.preferredHeight: 140
-            clip: true
-            model: {
-                const q = filter.text.toLowerCase();
-                const out = [];
-                const apps = DesktopEntries.applications.values;
-                for (const e of apps) {
-                    if (e.noDisplay)
-                        continue;
-                    if (q !== "" && e.name.toLowerCase().indexOf(q) === -1)
-                        continue;
-                    out.push(e);
-                }
-                return out;
-            }
-            delegate: Rectangle {
-                required property var modelData
-                width: parent.width
-                height: 30
-                radius: 6
-                color: addMa.containsMouse ? theme.lighterBackground : "transparent"
-                RowLayout {
-                    anchors.fill: parent
-                    anchors.leftMargin: 8
-                    Text {
-                        Layout.fillWidth: true
-                        text: modelData.name + (config.isPinned(modelData.id) ? "  (pinned)" : "")
-                        color: config.isPinned(modelData.id) ? theme.muted : theme.foreground
-                        elide: Text.ElideRight
+                    border.color: theme.lighterBackground
+                    border.width: 1
+                    clip: true
+
+                    ListView {
+                        id: appList
+                        anchors.fill: parent
+                        anchors.margins: 4
+                        spacing: 2
+                        model: {
+                            const q = filter.text.toLowerCase();
+                            const out = [];
+                            const apps = DesktopEntries.applications.values;
+                            for (const e of apps) {
+                                if (e.noDisplay)
+                                    continue;
+                                if (q !== ""
+                                    && e.name.toLowerCase().indexOf(q) === -1)
+                                    continue;
+                                out.push(e);
+                            }
+                            out.sort((a, b) => a.name.localeCompare(b.name));
+                            return out;
+                        }
+                        delegate: Rectangle {
+                            required property var modelData
+                            width: appList.width
+                            height: 34
+                            radius: 7
+                            color: addMa.containsMouse ? theme.lighterBackground
+                                                       : "transparent"
+                            RowLayout {
+                                anchors.fill: parent
+                                anchors.leftMargin: 8
+                                anchors.rightMargin: 10
+                                spacing: 10
+                                Image {
+                                    Layout.preferredWidth: 20
+                                    Layout.preferredHeight: 20
+                                    source: {
+                                        if (!modelData.icon)
+                                            return "";
+                                        const p = Quickshell.iconPath(modelData.icon);
+                                        if (!p) return "";
+                                        return p.indexOf("://") !== -1 ? p : "file://" + p;
+                                    }
+                                    fillMode: Image.PreserveAspectFit
+                                }
+                                Text {
+                                    Layout.fillWidth: true
+                                    text: modelData.name
+                                    color: config.isPinned(modelData.id)
+                                        ? theme.muted : theme.foreground
+                                    font.pixelSize: 13
+                                    elide: Text.ElideRight
+                                }
+                                Text {
+                                    visible: config.isPinned(modelData.id)
+                                    text: "pinned"
+                                    color: theme.accent
+                                    font.pixelSize: 11
+                                }
+                            }
+                            MouseArea {
+                                id: addMa
+                                anchors.fill: parent
+                                hoverEnabled: true
+                                cursorShape: Qt.PointingHandCursor
+                                enabled: !config.isPinned(modelData.id)
+                                onClicked: config.pin(modelData.id)
+                            }
+                        }
                     }
                 }
-                MouseArea {
-                    id: addMa
-                    anchors.fill: parent
-                    hoverEnabled: true
-                    enabled: !config.isPinned(modelData.id)
-                    onClicked: config.pin(modelData.id)
-                }
+
+                Item { Layout.preferredHeight: 4 }
             }
         }
     }
