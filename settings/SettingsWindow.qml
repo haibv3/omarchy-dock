@@ -17,25 +17,47 @@ FloatingWindow {
         if (!visible && globals.settingsOpen)
             globals.closeSettings();
     }
-    implicitWidth: 460
-    implicitHeight: 620
-    minimumSize: Qt.size(400, 480)
+    implicitWidth: 480
+    implicitHeight: 640
+    minimumSize: Qt.size(420, 480)
     color: theme.background
 
+    // ---- shared building blocks ----
     component SectionLabel: Text {
         property string label: ""
         text: label
         color: theme.darkForeground
         font.pixelSize: 11
         font.bold: true
-        font.letterSpacing: 1.2
+        font.letterSpacing: 1.4
     }
 
-    component RowLabel: Text {
+    component Separator: Rectangle {
+        Layout.fillWidth: true
+        Layout.leftMargin: 20
+        Layout.rightMargin: 20
+        height: 1
+        color: theme.lighterBackground
+        opacity: 0.6
+    }
+
+    // one settings row: label left, control right
+    component FormRow: RowLayout {
         property string label: ""
-        text: label
-        color: theme.foreground
-        font.pixelSize: 13
+        default property alias content: slot.data
+        Layout.fillWidth: true
+        spacing: 16
+        Text {
+            Layout.preferredWidth: 110
+            text: label
+            color: theme.foreground
+            font.pixelSize: 13
+        }
+        Item {
+            id: slot
+            Layout.fillWidth: true
+            implicitHeight: children.length ? children[0].implicitHeight : 0
+        }
     }
 
     Flickable {
@@ -52,7 +74,7 @@ FloatingWindow {
             RowLayout {
                 Layout.fillWidth: true
                 Layout.margins: 20
-                Layout.bottomMargin: 8
+                Layout.bottomMargin: 12
                 Text {
                     Layout.fillWidth: true
                     text: "Dock"
@@ -71,21 +93,19 @@ FloatingWindow {
             SectionLabel {
                 label: "APPEARANCE"
                 Layout.leftMargin: 20
-                Layout.topMargin: 8
+                Layout.bottomMargin: 10
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.margins: 20
-                Layout.topMargin: 8
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
                 spacing: 14
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    RowLabel { label: "Position" }
+                FormRow {
+                    label: "Position"
                     DSegmented {
                         theme: win.theme
-                        Layout.fillWidth: true
+                        width: parent.width
                         options: [
                             { label: "Top", value: "top" },
                             { label: "Bottom", value: "bottom" },
@@ -97,63 +117,64 @@ FloatingWindow {
                     }
                 }
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
+                FormRow {
+                    label: "Icon size"
                     RowLayout {
-                        Layout.fillWidth: true
-                        RowLabel { label: "Icon size"; Layout.fillWidth: true }
+                        width: parent.width
+                        spacing: 12
+                        DSlider {
+                            theme: win.theme
+                            Layout.fillWidth: true
+                            from: 24; to: 96; stepSize: 4
+                            value: config.iconSize
+                            onMoved: v => config.iconSize = v
+                        }
                         Text {
-                            text: config.iconSize + " px"
+                            Layout.preferredWidth: 44
+                            horizontalAlignment: Text.AlignRight
+                            text: config.iconSize + "px"
                             color: theme.darkForeground
                             font.pixelSize: 12
                         }
                     }
-                    DSlider {
-                        theme: win.theme
-                        Layout.fillWidth: true
-                        from: 24; to: 96; stepSize: 4
-                        value: config.iconSize
-                        onMoved: v => config.iconSize = v
-                    }
                 }
             }
+
+            Separator { Layout.topMargin: 18; Layout.bottomMargin: 14 }
 
             // ---------- behavior ----------
             SectionLabel {
                 label: "BEHAVIOR"
                 Layout.leftMargin: 20
-                Layout.topMargin: 16
+                Layout.bottomMargin: 10
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.margins: 20
-                Layout.topMargin: 8
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
                 spacing: 14
 
-                ColumnLayout {
-                    Layout.fillWidth: true
-                    spacing: 6
-                    RowLabel { label: "Auto-hide" }
+                FormRow {
+                    label: "Auto-hide"
                     DSegmented {
                         theme: win.theme
-                        Layout.fillWidth: true
+                        width: parent.width
                         options: [
                             { label: "Never", value: "never" },
-                            { label: "After delay", value: "timer" },
-                            { label: "Intellihide", value: "intellihide" }
+                            { label: "Delay", value: "timer" },
+                            { label: "Smart", value: "intellihide" }
                         ]
                         currentValue: config.autohide
                         onSelected: v => config.autohide = v
                     }
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
+                FormRow {
+                    label: "Hide delay"
                     visible: config.autohide !== "never"
-                    RowLabel { label: "Hide delay"; Layout.fillWidth: true }
                     DSpinBox {
                         theme: win.theme
+                        width: 140
                         from: 0; to: 3000; stepSize: 100
                         value: config.hideDelay
                         suffix: " ms"
@@ -161,12 +182,11 @@ FloatingWindow {
                     }
                 }
 
-                RowLayout {
-                    Layout.fillWidth: true
-                    RowLabel { label: "Monitor"; Layout.fillWidth: true }
+                FormRow {
+                    label: "Monitor"
                     DCombo {
                         theme: win.theme
-                        Layout.preferredWidth: 180
+                        width: 200
                         model: {
                             const out = [{ label: "All monitors", value: "all" }];
                             for (const s of Quickshell.screens)
@@ -179,16 +199,19 @@ FloatingWindow {
                 }
             }
 
+            Separator { Layout.topMargin: 18; Layout.bottomMargin: 14 }
+
             // ---------- pinned apps ----------
             SectionLabel {
                 label: "PINNED APPS"
                 Layout.leftMargin: 20
-                Layout.topMargin: 16
+                Layout.bottomMargin: 10
             }
             ColumnLayout {
                 Layout.fillWidth: true
-                Layout.margins: 20
-                Layout.topMargin: 8
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
+                Layout.bottomMargin: 16
                 spacing: 8
 
                 // current pins
@@ -198,14 +221,14 @@ FloatingWindow {
                         required property string modelData
                         required property int index
                         Layout.fillWidth: true
-                        height: 36
+                        height: 38
                         radius: 8
                         color: pinMa.containsMouse ? theme.lighterBackground
                                                    : theme.darkerBackground
                         RowLayout {
                             anchors.fill: parent
                             anchors.leftMargin: 10
-                            anchors.rightMargin: 6
+                            anchors.rightMargin: 8
                             spacing: 10
                             Image {
                                 Layout.preferredWidth: 22
@@ -215,7 +238,8 @@ FloatingWindow {
                                     if (!e || !e.icon)
                                         return "";
                                     const p = Quickshell.iconPath(e.icon);
-                                    if (!p) return "";
+                                    if (!p)
+                                        return "";
                                     return p.indexOf("://") !== -1 ? p : "file://" + p;
                                 }
                                 fillMode: Image.PreserveAspectFit
@@ -230,19 +254,34 @@ FloatingWindow {
                                 font.pixelSize: 13
                                 elide: Text.ElideRight
                             }
-                            Text {
-                                text: "✕"
-                                color: pinMa.containsMouse ? theme.red
-                                                           : theme.darkForeground
-                                font.pixelSize: 13
+                            Rectangle {
+                                width: 26
+                                height: 26
+                                radius: 6
+                                color: unpinMa.containsMouse ? theme.red
+                                                             : "transparent"
+                                Text {
+                                    anchors.centerIn: parent
+                                    text: "✕"
+                                    color: unpinMa.containsMouse
+                                        ? theme.darkerBackground
+                                        : theme.darkForeground
+                                    font.pixelSize: 12
+                                }
+                                MouseArea {
+                                    id: unpinMa
+                                    anchors.fill: parent
+                                    hoverEnabled: true
+                                    cursorShape: Qt.PointingHandCursor
+                                    onClicked: config.unpin(modelData)
+                                }
                             }
                         }
                         MouseArea {
                             id: pinMa
                             anchors.fill: parent
+                            anchors.rightMargin: 34
                             hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: config.unpin(modelData)
                         }
                     }
                 }
@@ -252,19 +291,21 @@ FloatingWindow {
                     text: "No pinned apps — add some below."
                     color: theme.muted
                     font.pixelSize: 12
+                    Layout.bottomMargin: 4
                 }
 
                 DField {
                     id: filter
                     theme: win.theme
                     Layout.fillWidth: true
+                    Layout.topMargin: 4
                     placeholder: "Search applications…"
                 }
 
                 // app picker
                 Rectangle {
                     Layout.fillWidth: true
-                    Layout.preferredHeight: 180
+                    Layout.preferredHeight: 190
                     radius: 9
                     color: theme.darkerBackground
                     border.color: theme.lighterBackground
@@ -310,7 +351,8 @@ FloatingWindow {
                                         if (!modelData.icon)
                                             return "";
                                         const p = Quickshell.iconPath(modelData.icon);
-                                        if (!p) return "";
+                                        if (!p)
+                                            return "";
                                         return p.indexOf("://") !== -1 ? p : "file://" + p;
                                     }
                                     fillMode: Image.PreserveAspectFit
@@ -341,8 +383,6 @@ FloatingWindow {
                         }
                     }
                 }
-
-                Item { Layout.preferredHeight: 4 }
             }
         }
     }

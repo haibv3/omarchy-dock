@@ -36,16 +36,16 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
-        color: theme.darkerBackground
-        border.color: theme.muted
+        radius: 10
+        color: theme.background
+        border.color: theme.lighterBackground
         border.width: 1
 
         Column {
             id: menuCol
             anchors.centerIn: parent
-            width: 220
-            spacing: 0
+            width: 232
+            spacing: 2
 
             Repeater {
                 model: root.row ? root.row.toplevels : []

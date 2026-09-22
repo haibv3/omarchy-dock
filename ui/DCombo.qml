@@ -1,7 +1,9 @@
 import QtQuick
 import QtQuick.Layouts
+import QtQuick.Controls as QC
 
-// Omarchy-style dropdown: bordered pill + inline popup list below.
+// Omarchy-style dropdown: bordered pill + overlay Popup (escapes
+// Flickable clipping and window-edge overflow).
 Rectangle {
     id: root
 
@@ -11,12 +13,10 @@ Rectangle {
     property string placeholder: "Select…"
     signal selected(var value)
 
-    property bool open: false
-
     implicitHeight: 34
     radius: 9
     color: theme.darkerBackground
-    border.color: root.open ? theme.accent : theme.lighterBackground
+    border.color: popup.opened ? theme.accent : theme.lighterBackground
     border.width: 1
 
     readonly property string currentLabel: {
@@ -38,7 +38,7 @@ Rectangle {
             elide: Text.ElideRight
         }
         Text {
-            text: root.open ? "▴" : "▾"
+            text: popup.opened ? "▴" : "▾"
             color: theme.darkForeground
             font.pixelSize: 11
         }
@@ -48,42 +48,44 @@ Rectangle {
         anchors.fill: parent
         hoverEnabled: true
         cursorShape: Qt.PointingHandCursor
-        onClicked: root.open = !root.open
+        onClicked: popup.opened ? popup.close() : popup.open()
     }
 
-    // dropdown list — overlays content below, parent must not clip
-    Rectangle {
+    QC.Popup {
         id: popup
-        visible: root.open
-        anchors.top: parent.bottom
-        anchors.topMargin: 4
-        anchors.left: parent.left
-        anchors.right: parent.right
-        height: Math.min(col.implicitHeight, 200)
-        radius: 9
-        color: theme.darkerBackground
-        border.color: theme.muted
-        border.width: 1
-        clip: true
-        z: 100
+        y: root.height + 4
+        width: root.width
+        height: Math.min(list.contentHeight, 220) + 8
+        padding: 4
 
-        ListView {
-            id: col
-            anchors.fill: parent
+        background: Rectangle {
+            radius: 9
+            color: root.theme.darkerBackground
+            border.color: root.theme.muted
+            border.width: 1
+        }
+
+        contentItem: ListView {
+            id: list
             model: root.model
+            clip: true
             delegate: Rectangle {
                 required property var modelData
-                width: col.width
+                width: list.width
                 height: 30
-                color: itemMa.containsMouse ? theme.lighterBackground : "transparent"
+                radius: 6
+                color: itemMa.containsMouse ? root.theme.lighterBackground
+                                            : "transparent"
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
-                    anchors.leftMargin: 12
+                    anchors.leftMargin: 10
+                    width: parent.width - 20
                     text: modelData.label
                     color: modelData.value === root.currentValue
-                        ? theme.accent : theme.foreground
+                        ? root.theme.accent : root.theme.foreground
                     font.pixelSize: 12
+                    elide: Text.ElideRight
                 }
                 MouseArea {
                     id: itemMa
@@ -91,7 +93,7 @@ Rectangle {
                     hoverEnabled: true
                     onClicked: {
                         root.selected(modelData.value);
-                        root.open = false;
+                        popup.close();
                     }
                 }
             }

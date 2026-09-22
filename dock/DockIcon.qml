@@ -62,7 +62,6 @@ Item {
             sourceSize.height: height * 2
             fillMode: Image.PreserveAspectFit
             smooth: true
-            opacity: root.running || root.pinned ? 1.0 : 0.85
         }
 
         // fallback glyph when no themed icon

@@ -103,8 +103,8 @@ PanelWindow {
 
         Rectangle {
             id: pill
-            color: Qt.rgba(theme.darkerBackground.r, theme.darkerBackground.g,
-                           theme.darkerBackground.b, 0.78)
+            color: Qt.rgba(theme.background.r, theme.background.g,
+                           theme.background.b, 0.85)
             radius: 16
             border.color: Qt.rgba(theme.lighterBackground.r,
                                   theme.lighterBackground.g,
