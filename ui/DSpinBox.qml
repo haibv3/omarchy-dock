@@ -17,7 +17,7 @@ Rectangle {
     implicitHeight: 34
     radius: 9
     color: theme.darkerBackground
-    border.color: theme.lighterBackground
+    border.color: theme.borderFill
     border.width: 1
 
     function setValue(v) {
@@ -35,7 +35,7 @@ Rectangle {
             Layout.preferredWidth: 30
             Layout.fillHeight: true
             radius: 6
-            color: minusMa.containsMouse ? theme.lighterBackground : "transparent"
+            color: minusMa.containsMouse ? theme.hoverFill : "transparent"
             Text {
                 anchors.centerIn: parent
                 text: "−"
@@ -63,7 +63,7 @@ Rectangle {
             Layout.preferredWidth: 30
             Layout.fillHeight: true
             radius: 6
-            color: plusMa.containsMouse ? theme.lighterBackground : "transparent"
+            color: plusMa.containsMouse ? theme.hoverFill : "transparent"
             Text {
                 anchors.centerIn: parent
                 text: "+"

@@ -38,7 +38,7 @@ PopupWindow {
         anchors.fill: parent
         radius: 10
         color: theme.background
-        border.color: theme.lighterBackground
+        border.color: theme.borderFill
         border.width: 1
 
         Column {
@@ -54,7 +54,7 @@ PopupWindow {
                     required property int index
                     width: menuCol.width
                     height: 28
-                    color: winMa.containsMouse ? theme.lighterBackground : "transparent"
+                    color: winMa.containsMouse ? theme.hoverFill : "transparent"
                     radius: 4
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
@@ -83,7 +83,7 @@ PopupWindow {
                 visible: root.row && root.row.toplevels.length > 0
                 width: menuCol.width
                 height: 1
-                color: theme.muted
+                color: theme.borderFill
                 opacity: 0.4
             }
 
@@ -91,7 +91,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: pinMa.containsMouse ? theme.lighterBackground : "transparent"
+                color: pinMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 visible: root.row && root.row.desktopId !== ""
                 Text {
@@ -120,7 +120,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: closeMa.containsMouse ? theme.lighterBackground : "transparent"
+                color: closeMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 visible: root.row && root.row.running
                 Text {
@@ -128,7 +128,7 @@ PopupWindow {
                     anchors.left: parent.left
                     anchors.leftMargin: 10
                     text: root.row && root.row.toplevels.length > 1 ? "Close all windows" : "Close window"
-                    color: theme.red
+                    color: theme.brightRed
                     font.pixelSize: 12
                 }
                 MouseArea {
@@ -148,7 +148,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 1
-                color: theme.muted
+                color: theme.borderFill
                 opacity: 0.4
             }
 
@@ -156,7 +156,7 @@ PopupWindow {
             Rectangle {
                 width: menuCol.width
                 height: 30
-                color: setMa.containsMouse ? theme.lighterBackground : "transparent"
+                color: setMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 Text {
                     anchors.verticalCenter: parent.verticalCenter

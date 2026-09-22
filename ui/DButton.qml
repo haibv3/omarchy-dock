@@ -1,6 +1,6 @@
 import QtQuick
 
-// Omarchy-style button: transparent idle, lighterBackground hover,
+// Omarchy-style button: transparent idle, hoverFill on hover,
 // accent fill when selected/pressed.
 Rectangle {
     id: root
@@ -21,18 +21,18 @@ Rectangle {
         if (root.selected)
             return theme.accent;
         if (ma.containsMouse)
-            return theme.lighterBackground;
+            return theme.hoverFill;
         return "transparent";
     }
     border.width: root.selected ? 0 : 1
-    border.color: ma.containsMouse ? theme.muted : theme.lighterBackground
+    border.color: theme.borderFill
 
     Text {
         id: label
         anchors.centerIn: parent
         text: root.text
         color: root.selected ? theme.darkerBackground
-             : root.danger ? theme.red
+             : root.danger ? theme.brightRed
              : theme.foreground
         font.pixelSize: 13
     }

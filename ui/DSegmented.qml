@@ -13,7 +13,7 @@ Rectangle {
     implicitHeight: 34
     radius: 9
     color: theme.darkerBackground
-    border.color: theme.lighterBackground
+    border.color: theme.borderFill
     border.width: 1
     clip: true
 
@@ -31,7 +31,7 @@ Rectangle {
                 Layout.fillHeight: true
                 radius: 6
                 color: modelData.value === root.currentValue ? theme.accent
-                     : segMa.containsMouse ? theme.lighterBackground
+                     : segMa.containsMouse ? theme.hoverFill
                      : "transparent"
                 Text {
                     anchors.centerIn: parent

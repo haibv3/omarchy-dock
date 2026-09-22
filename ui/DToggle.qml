@@ -11,7 +11,7 @@ Rectangle {
     implicitWidth: 44
     implicitHeight: 24
     radius: 12
-    color: root.checked ? theme.accent : theme.lighterBackground
+    color: root.checked ? theme.accent : theme.trackFill
 
     Behavior on color { ColorAnimation { duration: 120 } }
 

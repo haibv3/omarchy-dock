@@ -48,9 +48,9 @@ Item {
         width: root.iconSize + 2
         height: root.iconSize + 2
         radius: 7
-        color: mouse.containsMouse ? theme.lighterBackground : "transparent"
+        color: mouse.containsMouse ? theme.hoverFill : "transparent"
         border.width: root.urgent ? 2 : 0
-        border.color: theme.red
+        border.color: theme.brightRed
 
         Image {
             id: img
@@ -81,7 +81,7 @@ Item {
         width: 3
         height: 3
         radius: 1.5
-        color: root.urgent ? theme.red : theme.accent
+        color: root.urgent ? theme.brightRed : theme.accent
         anchors {
             horizontalCenter: root.vertical ? undefined : root.horizontalCenter
             verticalCenter: root.vertical ? root.verticalCenter : undefined

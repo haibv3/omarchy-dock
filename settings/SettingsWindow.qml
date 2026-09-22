@@ -37,7 +37,7 @@ FloatingWindow {
         Layout.leftMargin: 20
         Layout.rightMargin: 20
         height: 1
-        color: theme.lighterBackground
+        color: theme.borderFill
         opacity: 0.6
     }
 
@@ -232,7 +232,7 @@ FloatingWindow {
                         Layout.fillWidth: true
                         height: 38
                         radius: 8
-                        color: pinMa.containsMouse ? theme.lighterBackground
+                        color: pinMa.containsMouse ? theme.hoverFill
                                                    : theme.darkerBackground
                         RowLayout {
                             anchors.fill: parent
@@ -267,7 +267,7 @@ FloatingWindow {
                                 width: 26
                                 height: 26
                                 radius: 6
-                                color: unpinMa.containsMouse ? theme.red
+                                color: unpinMa.containsMouse ? theme.brightRed
                                                              : "transparent"
                                 Text {
                                     anchors.centerIn: parent
@@ -317,7 +317,7 @@ FloatingWindow {
                     Layout.preferredHeight: 190
                     radius: 9
                     color: theme.darkerBackground
-                    border.color: theme.lighterBackground
+                    border.color: theme.borderFill
                     border.width: 1
                     clip: true
 
@@ -346,7 +346,7 @@ FloatingWindow {
                             width: appList.width
                             height: 34
                             radius: 7
-                            color: addMa.containsMouse ? theme.lighterBackground
+                            color: addMa.containsMouse ? theme.hoverFill
                                                        : "transparent"
                             RowLayout {
                                 anchors.fill: parent

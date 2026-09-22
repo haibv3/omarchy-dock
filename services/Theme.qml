@@ -23,6 +23,15 @@ QtObject {
     property color red: "#f38ba8"
     property color yellow: "#f9e2af"
     property color green: "#a6e3a1"
+    property color brightRed: "#de6145"
+
+    // State fills — the shell composites foreground at low alpha rather
+    // than trusting lighter_background (some themes, e.g. solitude, set
+    // lighter_background == background which makes hover invisible).
+    readonly property color normalFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.04)
+    readonly property color hoverFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.08)
+    readonly property color trackFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.14)
+    readonly property color borderFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.16)
 
     function _parse(toml) {
         const map = {};
@@ -44,6 +53,7 @@ QtObject {
         if (c("red")) red = map["red"];
         if (c("yellow")) yellow = map["yellow"];
         if (c("green")) green = map["green"];
+        if (c("bright_red")) brightRed = map["bright_red"];
     }
 
     // theme.name changes on every theme-set → force colors.toml reload by

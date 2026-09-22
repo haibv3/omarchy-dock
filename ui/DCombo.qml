@@ -16,7 +16,7 @@ Rectangle {
     implicitHeight: 34
     radius: 9
     color: theme.darkerBackground
-    border.color: popup.opened ? theme.accent : theme.lighterBackground
+    border.color: popup.opened ? theme.accent : theme.borderFill
     border.width: 1
 
     readonly property string currentLabel: {
@@ -61,7 +61,7 @@ Rectangle {
         background: Rectangle {
             radius: 9
             color: root.theme.darkerBackground
-            border.color: root.theme.muted
+            border.color: root.theme.borderFill
             border.width: 1
         }
 
@@ -74,7 +74,7 @@ Rectangle {
                 width: list.width
                 height: 30
                 radius: 6
-                color: itemMa.containsMouse ? root.theme.lighterBackground
+                color: itemMa.containsMouse ? root.theme.hoverFill
                                             : "transparent"
                 Text {
                     anchors.verticalCenter: parent.verticalCenter

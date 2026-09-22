@@ -131,9 +131,7 @@ PanelWindow {
             color: Qt.rgba(theme.background.r, theme.background.g,
                            theme.background.b, 0.85)
             radius: 16
-            border.color: Qt.rgba(theme.lighterBackground.r,
-                                  theme.lighterBackground.g,
-                                  theme.lighterBackground.b, 0.9)
+            border.color: theme.borderFill
             border.width: 1
 
             // hugging the inner side; the `strip` gap faces the screen edge

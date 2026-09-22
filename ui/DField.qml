@@ -12,7 +12,7 @@ Rectangle {
     implicitHeight: 34
     radius: 9
     color: theme.darkerBackground
-    border.color: input.activeFocus ? theme.accent : theme.lighterBackground
+    border.color: input.activeFocus ? theme.accent : theme.borderFill
     border.width: 1
 
     TextInput {

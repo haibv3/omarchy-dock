@@ -29,7 +29,7 @@ Item {
         anchors.right: parent.right
         height: 4
         radius: 2
-        color: theme.lighterBackground
+        color: theme.trackFill
 
         Rectangle {
             width: root.progress * parent.width
