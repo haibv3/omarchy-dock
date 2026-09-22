@@ -23,7 +23,7 @@ command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -f -t "$HOM
 if [[ "${1:-}" == "--plugin" ]]; then
     dest="$HOME/.config/omarchy/plugins/$PLUGIN_ID"
     mkdir -p "$dest"
-    cp -r "$SRC"/{manifest.json,PluginEntry.qml,dock,services,settings} "$dest/"
+    cp -r "$SRC"/{manifest.json,PluginEntry.qml,dock,services,settings,ui} "$dest/"
     omarchy-shell shell rescanPlugins || true
     omarchy plugin enable "$PLUGIN_ID" || true
     echo "Plugin installed to $dest and enabled."

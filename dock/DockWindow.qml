@@ -60,11 +60,15 @@ PanelWindow {
     }
 
     // ---- layer-shell setup ----
+    // Anchor the dock edge plus BOTH cross-axis ends: the compositor then
+    // sizes the surface to the free space (screen minus other panels'
+    // exclusive zones). A fixed screen.height/width would overflow and
+    // get centered — shifting the pill off-center.
     anchors {
-        top: edge === "top"
-        bottom: edge === "bottom"
-        left: edge === "left"
-        right: edge === "right"
+        top: edge === "top" || vertical
+        bottom: edge === "bottom" || vertical
+        left: edge === "left" || !vertical
+        right: edge === "right" || !vertical
     }
     exclusiveZone: hidden ? strip : thickness
     Behavior on exclusiveZone {
