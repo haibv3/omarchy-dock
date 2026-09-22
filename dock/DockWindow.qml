@@ -104,9 +104,11 @@ PanelWindow {
         Rectangle {
             id: pill
             color: Qt.rgba(theme.darkerBackground.r, theme.darkerBackground.g,
-                           theme.darkerBackground.b, 0.92)
-            radius: 14
-            border.color: theme.muted
+                           theme.darkerBackground.b, 0.78)
+            radius: 16
+            border.color: Qt.rgba(theme.lighterBackground.r,
+                                  theme.lighterBackground.g,
+                                  theme.lighterBackground.b, 0.9)
             border.width: 1
 
             // centered on the free axis, hugging the anchored edge
