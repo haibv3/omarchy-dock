@@ -170,6 +170,15 @@ FloatingWindow {
                 }
 
                 FormRow {
+                    label: "Start on login"
+                    DToggle {
+                        theme: win.theme
+                        checked: config.autostart
+                        onToggled: c => config.autostart = c
+                    }
+                }
+
+                FormRow {
                     label: "Hide delay"
                     visible: config.autohide !== "never"
                     DSpinBox {

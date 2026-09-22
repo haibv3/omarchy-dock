@@ -9,13 +9,16 @@ QtObject {
 
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
-    property int iconSize: 48
+    // Defaults sized so dock thickness (iconSize + margin*2 + 6) equals
+    // the 26px omarchy bar.
+    property int iconSize: 16
     property int spacing: 6
-    property int margin: 8
+    property int margin: 2
     property string autohide: "intellihide" // never | timer | intellihide
     property int hideDelay: 400             // ms
     property string monitor: "all"          // "all" | connector name e.g. "eDP-1"
     property var pinned: []                 // desktop entry ids, ordered
+    property bool autostart: true           // launch standalone dock on login
 
     property bool _loaded: false
     property bool _applying: false
@@ -30,6 +33,7 @@ QtObject {
         if (o.hideDelay !== undefined) hideDelay = o.hideDelay;
         if (o.monitor !== undefined) monitor = o.monitor;
         if (o.pinned !== undefined) pinned = o.pinned;
+        if (o.autostart !== undefined) autostart = o.autostart;
         _applying = false;
     }
 
@@ -43,8 +47,8 @@ QtObject {
             margin: margin,
             autohide: autohide,
             hideDelay: hideDelay,
-            monitor: monitor,
-            pinned: pinned
+            pinned: pinned,
+            autostart: autostart,
         }, null, 2) + "\n");
     }
 
@@ -54,8 +58,8 @@ QtObject {
     onMarginChanged: save()
     onAutohideChanged: save()
     onHideDelayChanged: save()
-    onMonitorChanged: save()
     onPinnedChanged: save()
+    onAutostartChanged: save()
 
     function isPinned(desktopId) {
         return pinned.indexOf(desktopId) !== -1;

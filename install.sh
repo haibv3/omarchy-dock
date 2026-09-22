@@ -19,6 +19,13 @@ sed -i "s|^DOCK_PATH=.*|DOCK_PATH=\"\${OMARCHY_DOCK_PATH:-$SRC}\"|" "$HOME/.loca
 # Refresh caches (best-effort).
 command -v update-desktop-database >/dev/null && update-desktop-database "$HOME/.local/share/applications" || true
 command -v gtk-update-icon-cache >/dev/null && gtk-update-icon-cache -f -t "$HOME/.local/share/icons/hicolor" 2>/dev/null || true
+# Register login autostart (idempotent).
+AUTOSTART_LUA="$HOME/.config/hypr/autostart.lua"
+if [[ -f "$AUTOSTART_LUA" ]] \
+    && ! grep -q 'omarchy-dock --autostart' "$AUTOSTART_LUA"; then
+    printf '\no.launch_on_start("omarchy-dock --autostart")\n' >> "$AUTOSTART_LUA"
+    echo "Added autostart entry to $AUTOSTART_LUA"
+fi
 
 if [[ "${1:-}" == "--plugin" ]]; then
     dest="$HOME/.config/omarchy/plugins/$PLUGIN_ID"
