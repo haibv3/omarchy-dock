@@ -10,10 +10,10 @@ QtObject {
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
     // Defaults sized so dock thickness (iconSize + margin*2 + 6) equals
-    // the 26px omarchy bar.
-    property int iconSize: 16
-    property int spacing: 6
-    property int margin: 2
+    // the 26px omarchy bar while keeping the icon as large as possible.
+    property int iconSize: 20
+    property int spacing: 4
+    property int margin: 0
     property string autohide: "intellihide" // never | timer | intellihide
     property int hideDelay: 400             // ms
     property string monitor: "all"          // "all" | connector name e.g. "eDP-1"
@@ -47,6 +47,7 @@ QtObject {
             margin: margin,
             autohide: autohide,
             hideDelay: hideDelay,
+            monitor: monitor,
             pinned: pinned,
             autostart: autostart,
         }, null, 2) + "\n");
@@ -58,6 +59,7 @@ QtObject {
     onMarginChanged: save()
     onAutohideChanged: save()
     onHideDelayChanged: save()
+    onMonitorChanged: save()
     onPinnedChanged: save()
     onAutostartChanged: save()
 

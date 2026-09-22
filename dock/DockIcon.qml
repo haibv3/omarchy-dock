@@ -45,9 +45,9 @@ Item {
     Rectangle {
         id: tile
         anchors.centerIn: parent
-        width: root.iconSize + 8
-        height: root.iconSize + 8
-        radius: 12
+        width: root.iconSize + 2
+        height: root.iconSize + 2
+        radius: 7
         color: mouse.containsMouse ? theme.lighterBackground : "transparent"
         border.width: root.urgent ? 2 : 0
         border.color: theme.red
@@ -55,8 +55,8 @@ Item {
         Image {
             id: img
             anchors.centerIn: parent
-            width: root.iconSize - 10
-            height: root.iconSize - 10
+            width: root.iconSize - 4
+            height: root.iconSize - 4
             source: root.iconSource
             sourceSize.width: width * 2
             sourceSize.height: height * 2
@@ -78,17 +78,15 @@ Item {
     // running indicator — sits outside the tile, on the free-axis edge
     Rectangle {
         visible: root.running
-        width: 5
-        height: 5
-        radius: 2.5
+        width: 3
+        height: 3
+        radius: 1.5
         color: root.urgent ? theme.red : theme.accent
         anchors {
             horizontalCenter: root.vertical ? undefined : root.horizontalCenter
             verticalCenter: root.vertical ? root.verticalCenter : undefined
             bottom: root.vertical ? undefined : root.bottom
             right: root.vertical ? root.right : undefined
-            bottomMargin: 1
-            rightMargin: 1
         }
     }
 
