@@ -46,6 +46,13 @@ PanelWindow {
         }
     }
 
+    // Repositioning while hidden leaves the dock invisible at the new
+    // edge — surface it, then let autohide re-evaluate.
+    onEdgeChanged: {
+        hidden = false;
+        if (wantHide)
+            hideTimer.restart();
+    }
     Timer {
         id: hideTimer
         interval: config.hideDelay
@@ -60,6 +67,9 @@ PanelWindow {
         right: edge === "right"
     }
     exclusiveZone: hidden ? strip : thickness
+    Behavior on exclusiveZone {
+        NumberAnimation { duration: 240; easing.type: Easing.OutCubic }
+    }
     exclusionMode: ExclusionMode.Normal
     aboveWindows: true
     focusable: false
@@ -95,10 +105,21 @@ PanelWindow {
         HoverHandler { id: stripHover }
     }
 
-    // sliding surface
+    // sliding surface — sized to the pill (plus the strip gap) so the
+    // input mask only covers the visible dock, not the whole edge band
     Item {
         id: surface
-        anchors.fill: parent
+        anchors {
+            top: win.edge === "top" ? parent.top : undefined
+            bottom: win.edge === "bottom" ? parent.bottom : undefined
+            left: win.edge === "left" ? parent.left : undefined
+            right: win.edge === "right" ? parent.right : undefined
+            horizontalCenter: win.vertical ? undefined : parent.horizontalCenter
+            verticalCenter: win.vertical ? parent.verticalCenter : undefined
+        }
+        width: win.vertical ? win.thickness : pill.width
+        height: win.vertical ? pill.height : win.thickness
+
         HoverHandler { id: surfaceHover }
 
         Rectangle {
@@ -111,7 +132,7 @@ PanelWindow {
                                   theme.lighterBackground.b, 0.9)
             border.width: 1
 
-            // centered on the free axis, hugging the anchored edge
+            // hugging the inner side; the `strip` gap faces the screen edge
             anchors {
                 horizontalCenter: win.vertical ? undefined : parent.horizontalCenter
                 verticalCenter: win.vertical ? parent.verticalCenter : undefined
@@ -154,8 +175,8 @@ PanelWindow {
                ? (win.edge === "top" ? -(win.thickness)
                   : win.edge === "bottom" ? win.thickness : 0)
                : 0
-            Behavior on x { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
-            Behavior on y { NumberAnimation { duration: 160; easing.type: Easing.OutCubic } }
+            Behavior on x { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
+            Behavior on y { NumberAnimation { duration: 240; easing.type: Easing.OutCubic } }
         }
     }
 
