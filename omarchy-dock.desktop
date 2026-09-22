@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=Omarchy Dock
+GenericName=Dock
+Comment=Application dock for Omarchy — pinned apps, running windows, settings
+Exec=omarchy-dock
+Icon=omarchy-dock
+Categories=Utility;
+Keywords=dock;launcher;panel;
+StartupNotify=false

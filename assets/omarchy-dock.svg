@@ -1,0 +1,19 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#313244"/>
+      <stop offset="1" stop-color="#1e1e2e"/>
+    </linearGradient>
+  </defs>
+  <!-- dock shelf -->
+  <rect x="10" y="34" width="108" height="60" rx="16" fill="url(#bg)" stroke="#585b70" stroke-width="2"/>
+  <!-- app tiles -->
+  <rect x="24" y="48" width="20" height="20" rx="5" fill="#89b4fa"/>
+  <rect x="54" y="48" width="20" height="20" rx="5" fill="#a6e3a1"/>
+  <rect x="84" y="48" width="20" height="20" rx="5" fill="#f9e2af"/>
+  <!-- running indicators -->
+  <circle cx="34" cy="80" r="3" fill="#cdd6f4"/>
+  <circle cx="64" cy="80" r="3" fill="#cdd6f4"/>
+  <!-- reflection line -->
+  <rect x="24" y="98" width="80" height="3" rx="1.5" fill="#585b70" opacity="0.6"/>
+</svg>
