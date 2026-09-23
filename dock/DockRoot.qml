@@ -24,7 +24,7 @@ Item {
     Config { id: configSvc }
     Theme { id: themeSvc }
     HyprClients { id: hyprSvc }
-    Globals { id: globalsSvc }
+    Globals { id: globalsSvc; canQuit: root.canQuit }
 
     function dockScreens() {
         if (configSvc.monitor === "all")

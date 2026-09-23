@@ -17,8 +17,14 @@ plugin_active() {
 }
 
 if [[ "${1:-}" == "--quit" ]]; then
-    pkill -f "quickshell -p $DOCK_PATH" && echo "Dock stopped." \
-        || echo "Dock is not running."
+    # IPC resolves the instance by config path regardless of how it was
+    # launched (absolute path, relative '.', symlink…).
+    if quickshell ipc -p "$DOCK_PATH" call dock quit 2>/dev/null; then
+        echo "Dock stopped."
+        exit 0
+    fi
+    pkill -f "quickshell -p.*$(basename "$DOCK_PATH")" \
+        && echo "Dock stopped." || echo "Dock is not running."
     exit 0
 fi
 if [[ "${1:-}" == "--autostart" ]]; then

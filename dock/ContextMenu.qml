@@ -197,7 +197,11 @@ PopupWindow {
                     id: quitMa
                     anchors.fill: parent
                     hoverEnabled: true
-                    onClicked: Qt.quit()
+                    onClicked: {
+                        // Complete off: don't come back after reboot.
+                        config.autostart = false;
+                        Qt.quit();
+                    }
                 }
             }
         }
