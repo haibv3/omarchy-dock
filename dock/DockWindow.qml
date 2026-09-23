@@ -22,6 +22,7 @@ PanelWindow {
     // ---- visibility state ----
     // plugin summon: pin the dock open regardless of autohide mode
     property bool forceVisible: false
+    property bool canQuit: false
     readonly property bool hovered: stripHover.hovered || surfaceHover.hovered
     readonly property bool edgeBusy: config.autohide === "intellihide"
         && hyprClients.edgeOccupied(modelData.name, edge, thickness + 8)
@@ -161,6 +162,7 @@ PanelWindow {
                 config: win.config
                 theme: win.theme
                 globals: win.globals
+                canQuit: win.canQuit
             }
         }
 

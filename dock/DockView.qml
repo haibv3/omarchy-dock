@@ -12,6 +12,7 @@ Item {
     required property var globals
     property bool vertical: false
     property var dockWindow: null     // PanelWindow, for menu anchoring
+    property bool canQuit: false
     readonly property bool menuOpen: menu.visible
 
 
@@ -97,5 +98,6 @@ Item {
         config: root.config
         theme: root.theme
         globals: root.globals
+        canQuit: root.canQuit
     }
 }

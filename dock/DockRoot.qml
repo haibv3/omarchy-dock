@@ -12,6 +12,9 @@ Item {
 
     // When true (plugin summoned), dock ignores autohide and stays visible.
     property bool forceVisible: false
+    // Standalone only: quitting the process is safe. In plugin mode the
+    // dock shares the omarchy-shell process — Qt.quit() would kill it.
+    property bool canQuit: false
 
     property alias config: configSvc
     property alias theme: themeSvc

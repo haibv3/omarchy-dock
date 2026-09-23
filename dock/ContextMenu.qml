@@ -10,6 +10,7 @@ PopupWindow {
     required property var config
     required property var theme
     required property var globals
+    property bool canQuit: false
     signal menuClosed()
 
     anchor.rect: Qt.rect(0, 0, 1, 1)
@@ -174,6 +175,29 @@ PopupWindow {
                         globals.openSettings();
                         root.visible = false;
                     }
+                }
+            }
+
+            // Quit
+            Rectangle {
+                visible: root.canQuit
+                width: menuCol.width
+                height: 30
+                color: quitMa.containsMouse ? theme.hoverFill : "transparent"
+                radius: 4
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: "Quit dock"
+                    color: theme.brightRed
+                    font.pixelSize: 12
+                }
+                MouseArea {
+                    id: quitMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: Qt.quit()
                 }
             }
         }

@@ -16,7 +16,12 @@ plugin_active() {
         && pgrep -f 'quickshell.*omarchy/shell' >/dev/null 2>&1
 }
 
-if [[ "${1:-}" == "--autostart" ]]; then
+if [[ "${1:-}" == "--quit" ]]; then
+    pkill -f "quickshell -p $DOCK_PATH" && echo "Dock stopped." \
+        || echo "Dock is not running."
+    exit 0
+fi
+
     # Respect the user's "Start on login" toggle.
     grep -q '"autostart"[[:space:]]*:[[:space:]]*false' "$CONFIG" 2>/dev/null \
         && exit 0

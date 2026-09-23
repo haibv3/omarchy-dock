@@ -4,5 +4,5 @@ import "dock"
 import "services"
 
 ShellRoot {
-    DockRoot {}
+    DockRoot { canQuit: true }
 }
