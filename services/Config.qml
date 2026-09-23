@@ -9,11 +9,11 @@ QtObject {
 
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
-    // Defaults sized so dock thickness (iconSize + margin*2 + 6) equals
-    // the 26px omarchy bar while keeping the icon as large as possible.
-    property int iconSize: 20
+    // Defaults sized so dock thickness (iconSize + margin*2) equals the
+    // 26px omarchy bar while keeping the icon as large as possible.
+    property int iconSize: 24
     property int spacing: 4
-    property int margin: 0
+    property int margin: 1
     property string autohide: "intellihide" // never | timer | intellihide
     property int hideDelay: 400             // ms
     property string monitor: "all"          // "all" | connector name e.g. "eDP-1"

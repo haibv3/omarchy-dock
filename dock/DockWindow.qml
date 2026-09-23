@@ -17,7 +17,7 @@ PanelWindow {
     readonly property string edge: config.position          // top|bottom|left|right
     readonly property bool vertical: edge === "left" || edge === "right"
     readonly property int strip: 4
-    readonly property int thickness: config.iconSize + config.margin * 2 + 6
+    readonly property int thickness: config.iconSize + config.margin * 2
 
     // ---- visibility state ----
     // plugin summon: pin the dock open regardless of autohide mode
@@ -134,7 +134,8 @@ PanelWindow {
             border.color: theme.borderFill
             border.width: 1
 
-            // hugging the inner side; the `strip` gap faces the screen edge
+            // fills the whole surface — stripItem is a sibling at the
+            // screen edge, so no gap is needed inside the surface
             anchors {
                 horizontalCenter: win.vertical ? undefined : parent.horizontalCenter
                 verticalCenter: win.vertical ? parent.verticalCenter : undefined
@@ -142,15 +143,11 @@ PanelWindow {
                 bottom: win.edge === "bottom" ? parent.bottom : undefined
                 left: win.edge === "left" ? parent.left : undefined
                 right: win.edge === "right" ? parent.right : undefined
-                topMargin: win.edge === "top" ? win.strip : 0
-                bottomMargin: win.edge === "bottom" ? win.strip : 0
-                leftMargin: win.edge === "left" ? win.strip : 0
-                rightMargin: win.edge === "right" ? win.strip : 0
             }
-            width: win.vertical ? win.thickness - win.strip
+            width: win.vertical ? win.thickness
                                 : dockView.implicitWidth + 8
             height: win.vertical ? dockView.implicitHeight + 8
-                                 : win.thickness - win.strip
+                                 : win.thickness
 
             DockView {
                 id: dockView
