@@ -111,8 +111,9 @@ Theme (colors.toml) ─→ every visual
   monitor. Pinned apps absorb their running windows into one row; running-but-
   unpinned apps append at the end. appId→entry matching order: exact id →
   lowercase id → `startupClass` → `heuristicLookup`.
-- **DockWindow** is one layer-shell `PanelWindow` per selected screen. It
-  anchors the dock edge *plus both cross-axis ends* so the compositor sizes the
+- **DockWindow** is one layer-shell `PanelWindow` per selected screen, created
+  only while `config.enabled` (or a plugin summon). It anchors the dock edge
+  *plus both cross-axis ends* so the compositor sizes the
   surface to the free space; a fixed `screen.width/height` overflows and gets
   centered, shifting the pill off-center. A 4px strip keeps a small
   `exclusiveZone` while hidden so maximized windows can never cover the hover
@@ -183,4 +184,16 @@ Theme (colors.toml) ─→ every visual
     `~/.config/omarchy-dock/config.json`. Don't leave a standalone instance
     running while testing plugin mode — you'll be looking at two docks.
 11. **`omarchy-dock.sh --autostart`** deliberately no-ops when the plugin is
-    active or `"autostart": false` is in the config, to avoid double-launching.
+    *installed* (enabled or not — a disabled plugin means the user turned the
+    dock off) or `"autostart": false` is in the config, to avoid double-launching.
+    The launcher entry itself re-enables a disabled plugin before opening
+    settings, so `omarchy plugin disable haibv3.omarchy-dock` is never a dead end.
+12. **`config.enabled` is the master switch.** Off means no `DockWindow` at all
+    (`DockRoot.dockScreens()` returns `[]`) and no bar widget — not a hidden
+    dock. A plugin summon still overrides it (`forceVisible`).
+13. **"Start on login" means different things per host.** Standalone: `Config`
+    owns the `o.launch_on_start("omarchy-dock --autostart")` line in
+    `~/.config/hypr/autostart.lua` (add/remove on toggle; skipped when
+    `standalone` is false). Plugin: the settings window drives the *plugin's*
+    enabled state via `omarchy plugin enable|disable` and reads it back from
+    `omarchy plugin list --json` — never mirror it in config.json.

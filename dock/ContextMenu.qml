@@ -179,6 +179,34 @@ PopupWindow {
                 }
             }
 
+            // Master switch off: the dock/widget disappears until it is turned
+            // back on in settings (app launcher → Omarchy Dock).
+            Rectangle {
+                visible: config.enabled
+                width: menuCol.width
+                height: 30
+                color: offMa.containsMouse ? theme.hoverFill : "transparent"
+                radius: 4
+                Text {
+                    anchors.verticalCenter: parent.verticalCenter
+                    anchors.left: parent.left
+                    anchors.leftMargin: 10
+                    text: !globals.canQuit && config.displayMode === "menubar"
+                        ? "Turn off menubar icons" : "Turn off dock"
+                    color: theme.foreground
+                    font.pixelSize: 12
+                }
+                MouseArea {
+                    id: offMa
+                    anchors.fill: parent
+                    hoverEnabled: true
+                    onClicked: {
+                        config.enabled = false;
+                        root.visible = false;
+                    }
+                }
+            }
+
             // Quit
             Rectangle {
                 visible: root.canQuit

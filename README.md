@@ -7,6 +7,8 @@ A Quickshell app dock for Omarchy OS (Hyprland/Wayland), with an optional pinned
 - Pin favorite apps; running pinned apps show an indicator dot
 - Running-but-unpinned apps appear at the end of the dock
 - Presentation: dock or Omarchy menubar widget
+- Master on/off switch — off leaves no layer surface at all (no strip, no exclusive zone)
+- Start on login, in both presentations (standalone: Hyprland autostart hook; plugin: plugin enabled state)
 - Dock position: top / bottom / left / right
 - Optional transparent dock background
 - Icon size, spacing, margin
@@ -29,14 +31,24 @@ quickshell -p ~/Workspace/omarchy-dock
 
 ## Autostart
 
-Add to `~/.config/hypr/autostart.lua`:
+Settings → *Start on login* is the switch. In standalone mode it owns the
+Hyprland hook: turning it on writes
 
 ```lua
--- omarchy-dock
-os.execute("quickshell -p ~/Workspace/omarchy-dock &")
+o.launch_on_start("omarchy-dock --autostart")
 ```
 
-(or the equivalent `exec-once` form your Hyprland config uses)
+into `~/.config/hypr/autostart.lua` (only if that file exists), turning it off
+removes that line. `omarchy-dock --autostart` also refuses to start when the
+config says `"autostart": false`, when the Omarchy plugin is installed, or when
+a dock is already running.
+
+In plugin mode the shell loads enabled plugins at login, so the switch drives
+the plugin's enabled state instead (`omarchy plugin enable|disable`) — for the
+dock plugin in Dock mode, for the bar widget plugin in Menubar mode. Turning it
+off in Dock mode disables the plugin, which closes the settings window with it;
+run the app launcher entry (*Omarchy Dock*) or Omarchy menu → Setup → Plugins →
+Enable Plugin to bring it back.
 
 ## App menu entry
 
@@ -57,8 +69,9 @@ dock settings window (or starts the dock if it isn't running).
 
 Copies the dock panel plugin into `~/.config/omarchy/plugins/haibv3.omarchy-dock` and its companion bar widget into `~/.config/omarchy/plugins/haibv3.omarchy-dock-menubar`, then enables both. Select **Menubar** in dock settings to show pinned icons in the bar instead of a separate dock. Move the widget with `omarchy bar move haibv3.omarchy-dock-menubar --section <left|center|right>`.
 
-- Dock mode summon/hide: `omarchy-shell shell summon haibv3.omarchy-dock` / `omarchy-shell shell hide haibv3.omarchy-dock` (summon pins the dock visible; hide resumes autohide).
+- Dock mode summon/hide: `omarchy-shell shell summon haibv3.omarchy-dock` / `omarchy-shell shell hide haibv3.omarchy-dock` (summon pins the dock visible — it also overrides the master switch; hide resumes autohide).
 - Settings: right-click an app icon or run `omarchy-shell dock toggleSettings`.
+- The app launcher entry re-enables the dock plugin if it was disabled, then opens settings, so a disabled plugin is never a dead end.
 - **Caveat:** `keepLoaded` dock-plugin changes are not replaced on hot-reload — run `omarchy restart shell`.
 
 ## Config
@@ -69,6 +82,7 @@ Copies the dock panel plugin into `~/.config/omarchy/plugins/haibv3.omarchy-dock
 {
   "position": "bottom",
   "displayMode": "dock",
+  "enabled": true,
   "transparentBackground": false,
   "iconSize": 24,
   "spacing": 4,

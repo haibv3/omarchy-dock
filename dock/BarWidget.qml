@@ -13,7 +13,7 @@ Item {
     property string moduleName: "haibv3.omarchy-dock-menubar"
     property var settings: ({})
 
-    readonly property bool active: config.displayMode === "menubar"
+    readonly property bool active: config.enabled && config.displayMode === "menubar"
     visible: active
     implicitWidth: active ? dockView.implicitWidth : 0
     implicitHeight: active ? dockView.implicitHeight : 0

@@ -21,12 +21,17 @@ Item {
     property alias hyprClients: hyprSvc
     property alias globals: globalsSvc
 
-    Config { id: configSvc }
+    Config { id: configSvc; standalone: root.canQuit }
     Theme { id: themeSvc }
     HyprClients { id: hyprSvc }
     Globals { id: globalsSvc; canQuit: root.canQuit }
 
     function dockScreens() {
+        // Master switch off → no layer surface at all: no strip, no exclusive
+        // zone, no hover target. A plugin summon still overrides, because it
+        // is an explicit request to show the dock.
+        if (!configSvc.enabled && !root.forceVisible)
+            return [];
         if (!root.canQuit && configSvc.displayMode === "menubar")
             return [];
         if (configSvc.monitor === "all")

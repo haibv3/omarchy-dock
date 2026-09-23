@@ -1,6 +1,7 @@
 import QtQuick
 import QtQuick.Layouts
 import Quickshell
+import Quickshell.Io
 import "../services"
 import "../ui"
 
@@ -13,11 +14,61 @@ FloatingWindow {
     readonly property string activeDisplayMode:
         globals.canQuit ? "dock" : config.displayMode
 
+    // ---- "Start on login" in plugin mode ----
+    // The shell loads enabled plugins at login, so there the toggle drives the
+    // plugin's enabled state. The state is read back from the shell instead of
+    // mirrored in our config, so a change made from the Omarchy menu (Setup →
+    // Plugins) shows up here too.
+    readonly property string pluginId: win.activeDisplayMode === "menubar"
+        ? "haibv3.omarchy-dock-menubar" : "haibv3.omarchy-dock"
+    property bool pluginEnabled: true
+
+    function refreshPluginState() {
+        if (!globals.canQuit)
+            pluginListProc.running = true;
+    }
+
+    function setStartOnLogin(v) {
+        // Keep the standalone hook's gate consistent with the choice.
+        config.autostart = v;
+        if (globals.canQuit)
+            return; // Config syncs the hypr autostart hook itself
+        pluginCmdProc.command = ["omarchy", "plugin", v ? "enable" : "disable", win.pluginId];
+        pluginCmdProc.running = true;
+    }
+
+    Process {
+        id: pluginListProc
+        command: ["omarchy", "plugin", "list", "--json"]
+        stdout: StdioCollector {
+            onStreamFinished: {
+                try {
+                    for (const p of JSON.parse(this.text)) {
+                        if (p.id === win.pluginId) {
+                            win.pluginEnabled = p.enabled === true;
+                            break;
+                        }
+                    }
+                } catch (e) {
+                    console.warn("omarchy-dock: plugin list parse failed:", e);
+                }
+            }
+        }
+    }
+
+    Process {
+        id: pluginCmdProc
+        onExited: function () { win.refreshPluginState(); }
+    }
+
+
     title: win.activeDisplayMode === "menubar"
         ? "Omarchy Menubar Apps" : "Omarchy Dock Settings"
     visible: globals.settingsOpen
     onVisibleChanged: {
-        if (!visible && globals.settingsOpen)
+        if (visible)
+            win.refreshPluginState();
+        else if (globals.settingsOpen)
             globals.closeSettings();
     }
     implicitWidth: 480
@@ -89,6 +140,22 @@ FloatingWindow {
                     theme: win.theme
                     text: "✕"
                     onClicked: globals.closeSettings()
+                }
+            }
+
+            // ---------- master switch ----------
+            ColumnLayout {
+                Layout.fillWidth: true
+                Layout.leftMargin: 20
+                Layout.rightMargin: 20
+                Layout.bottomMargin: 18
+                FormRow {
+                    label: win.activeDisplayMode === "menubar" ? "Show in bar" : "Show dock"
+                    DToggle {
+                        theme: win.theme
+                        checked: config.enabled
+                        onToggled: c => config.enabled = c
+                    }
                 }
             }
 
@@ -199,13 +266,23 @@ FloatingWindow {
                 }
 
                 FormRow {
-                    visible: globals.canQuit
                     label: "Start on login"
                     DToggle {
                         theme: win.theme
-                        checked: config.autostart
-                        onToggled: c => config.autostart = c
+                        checked: globals.canQuit ? config.autostart : win.pluginEnabled
+                        onToggled: c => win.setStartOnLogin(c)
                     }
+                }
+
+                Text {
+                    visible: !globals.canQuit
+                    Layout.fillWidth: true
+                    wrapMode: Text.WordWrap
+                    text: win.activeDisplayMode === "menubar"
+                        ? "Off removes the pinned-app widget from the bar. Turn it back on here or from Omarchy menu → Setup → Plugins."
+                        : "Off disables the Omarchy Dock plugin, which closes this window too. Re-enable it from the app launcher (Omarchy Dock) or Omarchy menu → Setup → Plugins."
+                    color: theme.muted
+                    font.pixelSize: 11
                 }
 
                 FormRow {

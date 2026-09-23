@@ -10,6 +10,7 @@ QtObject {
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
     property string displayMode: "dock"  // dock | menubar
+    property bool enabled: true             // master on/off: dock/widget shown at all
     property bool transparentBackground: false
     // Defaults sized so dock thickness (iconSize + margin*2) equals the
     // 26px omarchy bar while keeping the icon as large as possible.
@@ -22,6 +23,11 @@ QtObject {
     property var pinned: []                 // desktop entry ids, ordered
     property bool autostart: true           // launch standalone dock on login
 
+    // Standalone host only. In plugin mode the shell owns the login state
+    // (plugin enabled/disabled), so the hypr autostart hook must not be
+    // touched from there.
+    property bool standalone: false
+
     property bool _loaded: false
     property bool _applying: false
 
@@ -29,6 +35,7 @@ QtObject {
         _applying = true;
         if (o.position !== undefined) position = o.position;
         if (o.displayMode !== undefined) displayMode = o.displayMode;
+        if (o.enabled !== undefined) enabled = o.enabled;
         if (o.transparentBackground !== undefined)
             transparentBackground = o.transparentBackground;
         if (o.iconSize !== undefined) iconSize = o.iconSize;
@@ -48,6 +55,7 @@ QtObject {
         fileView.setText(JSON.stringify({
             position: position,
             displayMode: displayMode,
+            enabled: enabled,
             transparentBackground: transparentBackground,
             iconSize: iconSize,
             spacing: spacing,
@@ -62,6 +70,7 @@ QtObject {
 
     onPositionChanged: save()
     onDisplayModeChanged: save()
+    onEnabledChanged: save()
     onTransparentBackgroundChanged: save()
     onIconSizeChanged: save()
     onSpacingChanged: save()
@@ -70,7 +79,39 @@ QtObject {
     onHideDelayChanged: save()
     onMonitorChanged: save()
     onPinnedChanged: save()
-    onAutostartChanged: save()
+    onAutostartChanged: {
+        save();
+        // install.sh adds the hook once; without this the toggle would be a
+        // no-op whenever the hook is missing, and would leave a stale hook
+        // behind after the user turns autostart off.
+        if (standalone && !_applying)
+            _syncAutostartHook();
+    }
+
+    // Keep ~/.config/hypr/autostart.lua in sync with the toggle. Only the
+    // line install.sh writes is touched; a missing file is left alone.
+    function _syncAutostartHook() {
+        const script = [
+            'f="$HOME/.config/hypr/autostart.lua"',
+            '[ -f "$f" ] || exit 0',
+            'line=\'o.launch_on_start("omarchy-dock --autostart")\'',
+            'if [ "$1" = on ]; then',
+            '    grep -qF "$line" "$f" || printf \'\\n%s\\n\' "$line" >> "$f"',
+            'else',
+            '    sed -i "/omarchy-dock --autostart/d" "$f"',
+            'fi',
+        ].join("\n");
+        hookProc.command = ["bash", "-c", script, "omarchy-dock", autostart ? "on" : "off"];
+        hookProc.running = true;
+    }
+
+    property Process hookProc: Process {
+        id: hookProc
+        onExited: function (exitCode) {
+            if (exitCode !== 0)
+                console.warn("omarchy-dock: autostart hook sync failed (exit " + exitCode + ")");
+        }
+    }
 
     function isPinned(desktopId) {
         return pinned.indexOf(desktopId) !== -1;
