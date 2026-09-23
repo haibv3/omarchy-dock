@@ -21,7 +21,7 @@ if [[ "${1:-}" == "--quit" ]]; then
         || echo "Dock is not running."
     exit 0
 fi
-
+if [[ "${1:-}" == "--autostart" ]]; then
     # Respect the user's "Start on login" toggle.
     grep -q '"autostart"[[:space:]]*:[[:space:]]*false' "$CONFIG" 2>/dev/null \
         && exit 0
