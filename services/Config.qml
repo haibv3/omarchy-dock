@@ -9,6 +9,8 @@ QtObject {
 
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
+    property string displayMode: "dock"  // dock | menubar
+    property bool transparentBackground: false
     // Defaults sized so dock thickness (iconSize + margin*2) equals the
     // 26px omarchy bar while keeping the icon as large as possible.
     property int iconSize: 24
@@ -26,6 +28,9 @@ QtObject {
     function _apply(o) {
         _applying = true;
         if (o.position !== undefined) position = o.position;
+        if (o.displayMode !== undefined) displayMode = o.displayMode;
+        if (o.transparentBackground !== undefined)
+            transparentBackground = o.transparentBackground;
         if (o.iconSize !== undefined) iconSize = o.iconSize;
         if (o.spacing !== undefined) spacing = o.spacing;
         if (o.margin !== undefined) margin = o.margin;
@@ -42,6 +47,8 @@ QtObject {
             return;
         fileView.setText(JSON.stringify({
             position: position,
+            displayMode: displayMode,
+            transparentBackground: transparentBackground,
             iconSize: iconSize,
             spacing: spacing,
             margin: margin,
@@ -54,6 +61,8 @@ QtObject {
     }
 
     onPositionChanged: save()
+    onDisplayModeChanged: save()
+    onTransparentBackgroundChanged: save()
     onIconSizeChanged: save()
     onSpacingChanged: save()
     onMarginChanged: save()

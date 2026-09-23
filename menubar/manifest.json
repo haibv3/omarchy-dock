@@ -1,0 +1,19 @@
+{
+  "schemaVersion": 1,
+  "id": "haibv3.omarchy-dock-menubar",
+  "name": "Omarchy Dock Menubar",
+  "version": "1.0.0",
+  "author": "HaiBachVan",
+  "description": "Pinned app icons for the Omarchy bar.",
+  "kinds": ["bar-widget"],
+  "entryPoints": {
+    "barWidget": "dock/BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Pinned apps",
+    "description": "Pinned app icons in the Omarchy bar",
+    "category": "Applications",
+    "allowMultiple": false,
+    "defaultSection": "left"
+  }
+}

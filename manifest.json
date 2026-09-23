@@ -4,7 +4,7 @@
   "name": "Omarchy Dock",
   "version": "1.0.0",
   "author": "HaiBachVan",
-  "description": "macOS/Ubuntu-style dock: pinned + running apps, autohide/intellihide, per-edge placement, Omarchy theme sync.",
+  "description": "macOS/Ubuntu-style dock for Omarchy OS.",
   "kinds": ["panel"],
   "keepLoaded": true,
   "entryPoints": {

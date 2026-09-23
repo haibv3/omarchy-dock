@@ -10,8 +10,11 @@ FloatingWindow {
     required property var config
     required property var theme
     required property var globals
+    readonly property string activeDisplayMode:
+        globals.canQuit ? "dock" : config.displayMode
 
-    title: "Omarchy Dock Settings"
+    title: win.activeDisplayMode === "menubar"
+        ? "Omarchy Menubar Apps" : "Omarchy Dock Settings"
     visible: globals.settingsOpen
     onVisibleChanged: {
         if (!visible && globals.settingsOpen)
@@ -77,7 +80,7 @@ FloatingWindow {
                 Layout.bottomMargin: 12
                 Text {
                     Layout.fillWidth: true
-                    text: "Dock"
+                    text: win.activeDisplayMode === "menubar" ? "Menubar apps" : "Dock"
                     color: theme.foreground
                     font.pixelSize: 20
                     font.bold: true
@@ -100,8 +103,23 @@ FloatingWindow {
                 Layout.leftMargin: 20
                 Layout.rightMargin: 20
                 spacing: 14
+                FormRow {
+                    visible: !globals.canQuit
+                    label: "Show in"
+                    DSegmented {
+                        theme: win.theme
+                        width: parent.width
+                        options: [
+                            { label: "Dock", value: "dock" },
+                            { label: "Menubar", value: "menubar" }
+                        ]
+                        currentValue: config.displayMode
+                        onSelected: v => config.displayMode = v
+                    }
+                }
 
                 FormRow {
+                    visible: win.activeDisplayMode === "dock"
                     label: "Position"
                     DSegmented {
                         theme: win.theme
@@ -118,6 +136,7 @@ FloatingWindow {
                 }
 
                 FormRow {
+                    visible: win.activeDisplayMode === "dock"
                     label: "Icon size"
                     RowLayout {
                         width: parent.width
@@ -138,6 +157,15 @@ FloatingWindow {
                         }
                     }
                 }
+                FormRow {
+                    visible: win.activeDisplayMode === "dock"
+                    label: "Transparent background"
+                    DToggle {
+                        theme: win.theme
+                        checked: config.transparentBackground
+                        onToggled: c => config.transparentBackground = c
+                    }
+                }
             }
 
             Separator { Layout.topMargin: 18; Layout.bottomMargin: 14 }
@@ -155,6 +183,7 @@ FloatingWindow {
                 spacing: 14
 
                 FormRow {
+                    visible: win.activeDisplayMode === "dock"
                     label: "Auto-hide"
                     DSegmented {
                         theme: win.theme
@@ -170,6 +199,7 @@ FloatingWindow {
                 }
 
                 FormRow {
+                    visible: globals.canQuit
                     label: "Start on login"
                     DToggle {
                         theme: win.theme
@@ -180,7 +210,7 @@ FloatingWindow {
 
                 FormRow {
                     label: "Hide delay"
-                    visible: config.autohide !== "never"
+                    visible: win.activeDisplayMode === "dock" && config.autohide !== "never"
                     DSpinBox {
                         theme: win.theme
                         width: 140
@@ -192,6 +222,7 @@ FloatingWindow {
                 }
 
                 FormRow {
+                    visible: win.activeDisplayMode === "dock"
                     label: "Monitor"
                     DCombo {
                         theme: win.theme

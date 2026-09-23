@@ -129,7 +129,8 @@ PanelWindow {
 
         Rectangle {
             id: pill
-            color: Qt.rgba(theme.background.r, theme.background.g,
+            color: win.config.transparentBackground ? "transparent"
+                 : Qt.rgba(theme.background.r, theme.background.g,
                            theme.background.b, 0.85)
             radius: 16
             border.color: theme.borderFill

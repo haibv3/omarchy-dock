@@ -6,6 +6,7 @@ QtObject {
     id: root
     property bool settingsOpen: false
     // Standalone only — in plugin mode Qt.quit() would kill the shell.
+    // Set by the standalone dock; false when hosted by Omarchy shell.
     property bool canQuit: false
 
     function openSettings() {

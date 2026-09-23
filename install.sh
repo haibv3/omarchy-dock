@@ -7,6 +7,7 @@ set -euo pipefail
 
 SRC="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 PLUGIN_ID="haibv3.omarchy-dock"
+BAR_PLUGIN_ID="haibv3.omarchy-dock-menubar"
 
 mkdir -p "$HOME/.config/omarchy-dock"
 install -Dm755 "$SRC/omarchy-dock.sh" "$HOME/.local/bin/omarchy-dock"
@@ -29,13 +30,17 @@ fi
 
 if [[ "${1:-}" == "--plugin" ]]; then
     dest="$HOME/.config/omarchy/plugins/$PLUGIN_ID"
-    mkdir -p "$dest"
+    bar_dest="$HOME/.config/omarchy/plugins/$BAR_PLUGIN_ID"
+    mkdir -p "$dest" "$bar_dest"
     cp -r "$SRC"/{manifest.json,PluginEntry.qml,dock,services,settings,ui} "$dest/"
+    install -Dm644 "$SRC/menubar/manifest.json" "$bar_dest/manifest.json"
+    cp -r "$SRC"/{dock,services,settings,ui} "$bar_dest/"
     omarchy-shell shell rescanPlugins || true
     omarchy plugin enable "$PLUGIN_ID" || true
-    echo "Plugin installed to $dest and enabled."
-    echo "NOTE: keepLoaded plugins only reload on shell restart — run"
-    echo "      'omarchy restart shell' (or reboot) to pick up code changes."
+    omarchy plugin enable "$BAR_PLUGIN_ID" || true
+    echo "Dock plugin installed to $dest."
+    echo "Menubar widget installed to $bar_dest and enabled in the bar."
+    echo "NOTE: keepLoaded dock-plugin changes require 'omarchy restart shell' or reboot."
 fi
 
 echo "Installed. 'Omarchy Dock' should now appear in your app launcher."

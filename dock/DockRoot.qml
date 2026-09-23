@@ -27,6 +27,8 @@ Item {
     Globals { id: globalsSvc; canQuit: root.canQuit }
 
     function dockScreens() {
+        if (!root.canQuit && configSvc.displayMode === "menubar")
+            return [];
         if (configSvc.monitor === "all")
             return Quickshell.screens;
         const s = Quickshell.screens.find(sc => sc.name === configSvc.monitor);
@@ -36,6 +38,7 @@ Item {
     Variants {
         model: root.dockScreens()
         delegate: DockWindow {
+            canQuit: root.canQuit
             forceVisible: root.forceVisible
             config: configSvc
             theme: themeSvc

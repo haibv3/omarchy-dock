@@ -11,15 +11,25 @@ Item {
     required property var theme
     required property var globals
     property bool vertical: false
-    property var dockWindow: null     // PanelWindow, for menu anchoring
+    property int iconSize: config.iconSize
+    // Cross-axis extent. 0 keeps the dock's own derivation; a bar host passes
+    // its thickness instead, because the bar's Row top-aligns slots shorter
+    // than the bar and the icons would sit above its optical center.
+    property int thickness: 0
+    readonly property int _thickness: thickness > 0 ? thickness : iconSize + config.margin * 2
+    property var dockWindow: null     // Window surface, for menu anchoring
     property bool canQuit: false
     readonly property bool menuOpen: menu.visible
 
 
-    implicitWidth: vertical ? config.iconSize + config.margin * 2
-                          : view.contentWidth + config.margin * 2
-    implicitHeight: vertical ? view.contentHeight + config.margin * 2
-                             : config.iconSize + config.margin * 2
+    // Bar widgets are sized from their implicit size, so ListView's content
+    // extent cannot determine that size without a circular dependency.
+    implicitWidth: vertical
+        ? _thickness
+        : appModel.model.count * (iconSize + config.spacing) + config.margin * 2
+    implicitHeight: vertical
+        ? appModel.model.count * (iconSize + config.spacing) + config.margin * 2
+        : _thickness
 
     // manual reorder state
     property int dragIndex: -1
@@ -51,6 +61,7 @@ Item {
         delegate: DockIcon {
             config: root.config
             theme: root.theme
+            iconSize: root.iconSize
             vertical: root.vertical
             dragging: root.dragIndex === index
 

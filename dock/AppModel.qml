@@ -12,6 +12,7 @@ QtObject {
     // ShellScreen name this model serves ("" = all monitors merged).
     property string monitorName: ""
     required property var config
+    property bool includeUnpinnedRunning: true
 
     readonly property ListModel model: ListModel {}
 
@@ -97,6 +98,8 @@ QtObject {
         // running but not pinned → appended at the end
         for (const appId in groups) {
             if (consumed[appId])
+                continue;
+            if (!includeUnpinnedRunning)
                 continue;
             const entry = entryForAppId(appId);
             const tls = groups[appId];

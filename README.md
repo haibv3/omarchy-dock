@@ -1,15 +1,17 @@
 # omarchy-dock
 
-A macOS/Ubuntu-style dock for Omarchy OS (Hyprland/Wayland), built on Quickshell.
+A Quickshell app dock for Omarchy OS (Hyprland/Wayland), with an optional pinned-app menubar widget.
 
 ## Features
 
-- Pin favorite apps; running apps merge into pinned icons with an indicator dot
+- Pin favorite apps; running pinned apps show an indicator dot
 - Running-but-unpinned apps appear at the end of the dock
-- Position: top / bottom / left / right
+- Presentation: dock or Omarchy menubar widget
+- Dock position: top / bottom / left / right
+- Optional transparent dock background
 - Icon size, spacing, margin
 - Auto-hide: never / after delay / intellihide (hides when a window touches the dock edge)
-- Per-monitor or all-monitors
+- Per-monitor or all-monitors for the dock
 - Drag to reorder pinned apps
 - Right-click menu: focus windows, pin/unpin, close, settings
 - Follows the active Omarchy theme (`colors.toml`)
@@ -47,21 +49,17 @@ Installs `omarchy-dock` into `~/.local/bin`, a `.desktop` entry into
 "Omarchy Dock" then appears in your app launcher — clicking it opens the
 dock settings window (or starts the dock if it isn't running).
 
-## Omarchy shell plugin (phase 2)
+## Omarchy shell plugin
 
 ```bash
 ./install.sh --plugin
 ```
 
-Copies the dock into `~/.config/omarchy/plugins/haibv3.omarchy-dock` and
-enables it. The dock then runs inside `omarchy-shell` — no extra process.
+Copies the dock panel plugin into `~/.config/omarchy/plugins/haibv3.omarchy-dock` and its companion bar widget into `~/.config/omarchy/plugins/haibv3.omarchy-dock-menubar`, then enables both. Select **Menubar** in dock settings to show pinned icons in the bar instead of a separate dock. Move the widget with `omarchy bar move haibv3.omarchy-dock-menubar --section <left|center|right>`.
 
-- Summon/hide: `omarchy-shell shell summon haibv3.omarchy-dock` /
-  `omarchy-shell shell hide haibv3.omarchy-dock` (summon pins the dock
-  visible; hide resumes autohide).
-- Settings: `omarchy-shell dock toggleSettings` or the app-menu entry.
-- **Caveat:** `keepLoaded` plugins are not replaced on hot-reload — code
-  changes need `omarchy restart shell`.
+- Dock mode summon/hide: `omarchy-shell shell summon haibv3.omarchy-dock` / `omarchy-shell shell hide haibv3.omarchy-dock` (summon pins the dock visible; hide resumes autohide).
+- Settings: right-click an app icon or run `omarchy-shell dock toggleSettings`.
+- **Caveat:** `keepLoaded` dock-plugin changes are not replaced on hot-reload — run `omarchy restart shell`.
 
 ## Config
 
@@ -70,9 +68,11 @@ enables it. The dock then runs inside `omarchy-shell` — no extra process.
 ```json
 {
   "position": "bottom",
-  "iconSize": 48,
-  "spacing": 6,
-  "margin": 8,
+  "displayMode": "dock",
+  "transparentBackground": false,
+  "iconSize": 24,
+  "spacing": 4,
+  "margin": 1,
   "autohide": "intellihide",
   "hideDelay": 400,
   "monitor": "all",
@@ -80,10 +80,10 @@ enables it. The dock then runs inside `omarchy-shell` — no extra process.
 }
 ```
 
-All options are also editable in the GUI: right-click the dock → *Dock settings…*.
+All options are also editable in the GUI: right-click an app icon → *Dock settings…* / *Menubar settings…*.
 
 ## Notes
 
 - Tested against Quickshell 0.3.1 (Omarchy 4.0.4).
 - Intellihide polls `hyprctl clients -j` debounced off the Hyprland event socket.
-- Packaging as an `omarchy plugin` (`kinds: ["panel"]`, `keepLoaded`) is planned phase 2; the Theme/Config singletons are the only swap points.
+- Menubar presentation requires the Omarchy shell plugin; standalone mode remains a dock.

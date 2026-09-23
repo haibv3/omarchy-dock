@@ -2,7 +2,7 @@ import QtQuick
 import Quickshell
 import "../services"
 
-// Popup context menu anchored to a dock icon.
+// Popup context menu anchored to an app icon.
 PopupWindow {
     id: root
 
@@ -99,7 +99,7 @@ PopupWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.leftMargin: 10
-                    text: root.row && root.row.pinned ? "Unpin from dock" : "Pin to dock"
+                    text: root.row && root.row.pinned ? "Unpin app" : "Pin app"
                     color: theme.foreground
                     font.pixelSize: 12
                 }
@@ -163,7 +163,8 @@ PopupWindow {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
                     anchors.leftMargin: 10
-                    text: "Dock settings…"
+                    text: !globals.canQuit && config.displayMode === "menubar"
+                        ? "Menubar settings…" : "Dock settings…"
                     color: theme.foreground
                     font.pixelSize: 12
                 }
