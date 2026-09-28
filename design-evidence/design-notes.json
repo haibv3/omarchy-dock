@@ -126,10 +126,9 @@
         "kind": "file",
         "path": "design-evidence/walkthrough.html"
       },
-      "status": "unanswered",
+      "status": "agreed",
       "createdAt": "2026-09-28T15:45:00+07:00"
-    }
-    ,
+    },
     {
       "id": "n9",
       "scope": "whole app",
@@ -139,8 +138,11 @@
       "traded": "New config key, a new settings row, and a second colors.toml code path (kept, guarded behind palette)",
       "instead": "Hard-coding hexes inside Theme.qml — rejected: tokens must live in the W3C JSON source",
       "basis": "Design-system brief requires referencing tokens; Omarchy integration preserved via palette='omarchy'",
-      "anchor": {"kind": "file", "path": "services/signal-dark.tokens.json"},
-      "status": "unanswered",
+      "anchor": {
+        "kind": "file",
+        "path": "services/signal-dark.tokens.json"
+      },
+      "status": "agreed",
       "createdAt": "2026-09-28T16:15:00+07:00"
     }
   ]

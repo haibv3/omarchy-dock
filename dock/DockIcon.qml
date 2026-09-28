@@ -57,8 +57,14 @@ Item {
             width: root.iconSize - 4
             height: root.iconSize - 4
             source: root.iconSource
-            sourceSize.width: width * 2
-            sourceSize.height: height * 2
+            // Decode at physical pixels like the bar's Tray.qml does:
+            // logical×2 both upsamples at fractional scales (e.g. 1.6x needs
+            // only 1.6×12=19px) and wastes decode budget at 1x.
+            sourceSize.width: Math.max(1, Math.round(width * Screen.devicePixelRatio))
+            sourceSize.height: Math.max(1, Math.round(height * Screen.devicePixelRatio))
+            // mipmap + smooth: themed PNGs are 48-256px sources downscaled to
+            // ~12px; without mipmapping the sampler aliases and reads blurry.
+            mipmap: true
             fillMode: Image.PreserveAspectFit
             smooth: true
             // pinned-but-idle reads dimmer — running/pinned running rows keep
