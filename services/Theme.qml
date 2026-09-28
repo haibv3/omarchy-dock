@@ -41,6 +41,13 @@ QtObject {
     readonly property color trackFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.14)
     readonly property color borderFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.16)
 
+    // Shape + type roles — Signal Dark tokens; "omarchy" keeps these values
+    // too since the token set is the design system, not a host override.
+    property int radiusControl: 4
+    property int radiusWindow: 8
+    property int radiusDock: 12
+    property string fontMono: "JetBrains Mono"
+
     // Palette source. "signal" maps the Signal Dark token palette onto the
     // same roles (dark console, single electric accent); "omarchy" follows
     // the host theme's colors.toml. Roles keep their names — only values swap.
@@ -74,6 +81,19 @@ QtObject {
         if (v("warning")) yellow = v("warning");
         if (v("accent")) green = v("accent");
         if (v("danger")) brightRed = v("danger");
+    }
+
+    function _applySignalShape() {
+        if (!_signalTokens)
+            return;
+        const r = _signalTokens.radius || {};
+        const px = k => r[k] && r[k].$value ? parseInt(r[k].$value) : 0;
+        if (px("control")) radiusControl = px("control");
+        if (px("window")) radiusWindow = px("window");
+        if (px("dock")) radiusDock = px("dock");
+        const ty = _signalTokens.typography || {};
+        if (ty["font-mono"] && ty["font-mono"].$value)
+            fontMono = ty["font-mono"].$value.split(",")[0].trim();
     }
     function _parse(toml) {
         if (root.palette === "signal")
@@ -141,8 +161,10 @@ QtObject {
             } catch (e) {
                 console.warn("omarchy-dock: bad signal-dark.tokens.json, keeping defaults:", e);
             }
-            if (root.palette === "signal")
+            if (root.palette === "signal") {
                 root._applySignal();
+                root._applySignalShape();
+            }
         }
         onLoadFailed: console.warn("omarchy-dock: signal-dark.tokens.json not found, using defaults")
         onFileChanged: tokensFile.reload()

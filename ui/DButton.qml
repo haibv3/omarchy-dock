@@ -13,7 +13,7 @@ Rectangle {
 
     implicitWidth: label.implicitWidth + 24
     implicitHeight: 32
-    radius: 4
+    radius: theme.radiusControl
 
     color: {
         if (ma.pressed)

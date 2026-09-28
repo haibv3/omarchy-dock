@@ -14,7 +14,7 @@ Rectangle {
     signal selected(var value)
 
     implicitHeight: 34
-    radius: 4
+    radius: theme.radiusControl
     color: theme.darkerBackground
     border.color: popup.opened ? theme.accent : theme.borderFill
     border.width: 1
@@ -59,7 +59,7 @@ Rectangle {
         padding: 4
 
         background: Rectangle {
-            radius: 8
+            radius: theme.radiusWindow
             color: root.theme.darkerBackground
             border.color: root.theme.borderFill
             border.width: 1
@@ -73,7 +73,7 @@ Rectangle {
                 required property var modelData
                 width: list.width
                 height: 30
-                radius: 4
+                radius: theme.radiusControl
                 color: itemMa.containsMouse ? root.theme.hoverFill
                                             : "transparent"
                 Text {

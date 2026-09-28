@@ -146,6 +146,9 @@ Theme (signal-dark.tokens.json, or colors.toml when palette="omarchy") ─→ ev
 - Secondary/dim **text** uses `theme.mutedText` (readable, ≥4.5:1);
   `theme.muted` is non-text chrome only (separators, caret glyphs) — it sits
   at ~4.0:1 on `background` under the Signal Dark palette.
+- Corners and mono type come from `theme.radiusControl / radiusWindow /
+  radiusDock / fontMono` (Signal Dark tokens in `signal-dark.tokens.json`).
+  Only geometric corners stay literal (pill track `height/2`, round knob).
 - `ui/D*.qml` controls take `required property var theme` and emit signals
   (`clicked`, `toggled`, `moved`, `selected`, `valueModified`). They never read
   `config` directly; the caller wires them.

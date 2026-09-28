@@ -11,7 +11,7 @@ Rectangle {
     signal selected(var value)
 
     implicitHeight: 34
-    radius: 4
+    radius: theme.radiusControl
     color: theme.darkerBackground
     border.color: theme.borderFill
     border.width: 1
@@ -29,7 +29,7 @@ Rectangle {
                 required property int index
                 Layout.fillWidth: true
                 Layout.fillHeight: true
-                radius: 2
+                radius: Math.max(0, theme.radiusControl - 2)
                 color: modelData.value === root.currentValue ? theme.accent
                      : segMa.containsMouse ? theme.hoverFill
                      : "transparent"

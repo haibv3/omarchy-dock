@@ -37,7 +37,7 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 8
+        radius: theme.radiusWindow
         color: theme.background
         border.color: theme.borderFill
         border.width: 1
@@ -59,7 +59,7 @@ PopupWindow {
                       + (root.row && root.row.toplevels.length > 1 ? " windows" : " window")
                 color: theme.mutedText
                 font.pixelSize: 12
-                font.family: "JetBrains Mono"
+                font.family: theme.fontMono
                 font.letterSpacing: 1.2
             }
 
@@ -71,7 +71,7 @@ PopupWindow {
                     width: menuCol.width
                     height: 26
                     color: winMa.containsMouse ? theme.hoverFill : "transparent"
-                    radius: 4
+                    radius: theme.radiusControl
                     Text {
                         anchors.verticalCenter: parent.verticalCenter
                         anchors.left: parent.left
@@ -108,7 +108,7 @@ PopupWindow {
                 width: menuCol.width
                 height: 26
                 color: pinMa.containsMouse ? theme.hoverFill : "transparent"
-                radius: 4
+                radius: theme.radiusControl
                 visible: root.row && root.row.desktopId !== ""
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
@@ -137,7 +137,7 @@ PopupWindow {
                 width: menuCol.width
                 height: 26
                 color: closeMa.containsMouse ? theme.hoverFill : "transparent"
-                radius: 4
+                radius: theme.radiusControl
                 visible: root.row && root.row.running
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
@@ -173,7 +173,7 @@ PopupWindow {
                 width: menuCol.width
                 height: 26
                 color: setMa.containsMouse ? theme.hoverFill : "transparent"
-                radius: 4
+                radius: theme.radiusControl
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
@@ -201,7 +201,7 @@ PopupWindow {
                 width: menuCol.width
                 height: 26
                 color: offMa.containsMouse ? theme.hoverFill : "transparent"
-                radius: 4
+                radius: theme.radiusControl
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left
@@ -228,7 +228,7 @@ PopupWindow {
                 width: menuCol.width
                 height: 26
                 color: quitMa.containsMouse ? theme.hoverFill : "transparent"
-                radius: 4
+                radius: theme.radiusControl
                 Text {
                     anchors.verticalCenter: parent.verticalCenter
                     anchors.left: parent.left

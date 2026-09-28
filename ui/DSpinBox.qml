@@ -15,7 +15,7 @@ Rectangle {
 
     implicitWidth: 130
     implicitHeight: 34
-    radius: 4
+    radius: theme.radiusControl
     color: theme.darkerBackground
     border.color: theme.borderFill
     border.width: 1
@@ -34,7 +34,7 @@ Rectangle {
         Rectangle {
             Layout.preferredWidth: 30
             Layout.fillHeight: true
-            radius: 2
+            radius: Math.max(0, theme.radiusControl - 2)
             color: minusMa.containsMouse ? theme.hoverFill : "transparent"
             Text {
                 anchors.centerIn: parent
@@ -57,13 +57,13 @@ Rectangle {
             text: root.value + root.suffix
             color: theme.foreground
             font.pixelSize: 13
-            font.family: "JetBrains Mono"
+            font.family: theme.fontMono
         }
 
         Rectangle {
             Layout.preferredWidth: 30
             Layout.fillHeight: true
-            radius: 2
+            radius: Math.max(0, theme.radiusControl - 2)
             color: plusMa.containsMouse ? theme.hoverFill : "transparent"
             Text {
                 anchors.centerIn: parent

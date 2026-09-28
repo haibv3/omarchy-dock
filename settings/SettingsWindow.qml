@@ -83,7 +83,7 @@ FloatingWindow {
         color: theme.darkForeground
         font.pixelSize: 11
         font.bold: true
-        font.family: "JetBrains Mono"
+        font.family: theme.fontMono
         font.letterSpacing: 1.4
     }
 
@@ -237,7 +237,7 @@ FloatingWindow {
                             text: config.iconSize + "px"
                             color: theme.darkForeground
                             font.pixelSize: 12
-                            font.family: "JetBrains Mono"
+                            font.family: theme.fontMono
                         }
                     }
                 }
@@ -356,7 +356,7 @@ FloatingWindow {
                         required property int index
                         Layout.fillWidth: true
                         height: 38
-                        radius: 4
+                        radius: theme.radiusControl
                         color: pinMa.containsMouse ? theme.hoverFill
                                                    : theme.darkerBackground
                         RowLayout {
@@ -391,7 +391,7 @@ FloatingWindow {
                             Rectangle {
                                 width: 26
                                 height: 26
-                                radius: 4
+                                radius: theme.radiusControl
                                 color: unpinMa.containsMouse
                                     ? Qt.rgba(theme.brightRed.r, theme.brightRed.g, theme.brightRed.b, 0.14)
                                     : "transparent"
@@ -441,7 +441,7 @@ FloatingWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 190
-                    radius: 4
+                    radius: theme.radiusControl
                     color: theme.darkerBackground
                     border.color: theme.borderFill
                     border.width: 1
@@ -471,7 +471,7 @@ FloatingWindow {
                             required property var modelData
                             width: appList.width
                             height: 34
-                            radius: 4
+                            radius: theme.radiusControl
                             color: addMa.containsMouse ? theme.hoverFill
                                                        : "transparent"
                             RowLayout {
@@ -505,7 +505,7 @@ FloatingWindow {
                                     text: "pinned"
                                     color: theme.accent
                                     font.pixelSize: 11
-                                    font.family: "JetBrains Mono"
+                                    font.family: theme.fontMono
                                 }
                             }
                             MouseArea {
@@ -542,7 +542,7 @@ FloatingWindow {
             text: "▼ scroll"
             color: theme.mutedText
             font.pixelSize: 12
-            font.family: "JetBrains Mono"
+            font.family: theme.fontMono
             font.letterSpacing: 1.2
         }
     }

@@ -47,7 +47,7 @@ Item {
         anchors.centerIn: parent
         width: root.iconSize + 2
         height: root.iconSize + 2
-        radius: 4
+        radius: theme.radiusControl
         color: mouse.containsMouse ? theme.hoverFill : "transparent"
         border.width: root.urgent ? 2 : 0
         border.color: theme.brightRed

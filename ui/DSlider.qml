@@ -28,13 +28,13 @@ Item {
         anchors.left: parent.left
         anchors.right: parent.right
         height: 4
-        radius: 2
+        radius: Math.max(0, theme.radiusControl - 2)
         color: theme.trackFill
 
         Rectangle {
             width: root.progress * parent.width
             height: parent.height
-            radius: 2
+            radius: Math.max(0, theme.radiusControl - 2)
             color: theme.accent
         }
     }
@@ -45,7 +45,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 16
         height: 16
-        radius: 4
+        radius: theme.radiusControl
         color: theme.foreground
         border.color: theme.accent
         border.width: ma.containsMouse || ma.pressed ? 2 : 0

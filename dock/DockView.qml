@@ -57,7 +57,7 @@ Item {
         text: "no apps — open Dock settings to pin"
         color: theme.mutedText
         font.pixelSize: 12
-        font.family: "JetBrains Mono"
+        font.family: theme.fontMono
     }
     ListView {
         id: view

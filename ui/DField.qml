@@ -10,7 +10,7 @@ Rectangle {
     signal accepted()
 
     implicitHeight: 34
-    radius: 4
+    radius: theme.radiusControl
     color: theme.darkerBackground
     border.color: input.activeFocus ? theme.accent : theme.borderFill
     border.width: 1
