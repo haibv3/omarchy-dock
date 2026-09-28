@@ -6,7 +6,7 @@ Text {
     property string label: ""
 
     text: label
-    color: theme.darkForeground
+    color: theme.mutedText
     font.pixelSize: 11
     font.bold: true
     font.family: theme.fontMono

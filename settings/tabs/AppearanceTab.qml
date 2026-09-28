@@ -159,7 +159,7 @@ ColumnLayout {
                     Layout.preferredWidth: 46
                     horizontalAlignment: Text.AlignRight
                     text: root.config.iconSize + "px"
-                    color: root.theme.darkForeground
+                    color: root.theme.mutedText
                     font.pixelSize: 12
                     font.family: root.theme.fontMono
                 }

@@ -3,12 +3,24 @@ import QtQuick.Layouts
 import Quickshell
 import "../../ui"
 
-// Settings → Pinned apps: the ordered pin list plus the app picker.
+// Settings → Pinned apps. The page hugs the pane height instead of stacking
+// into one scroll: the pinned list is a card that grows with content but caps
+// at ~42% of the pane and scrolls internally, so the search-and-add picker is
+// always visible below it — pinning more apps never pushes the add flow away.
 ColumnLayout {
     id: root
 
     required property var config
     required property var theme
+
+    // Viewport height inside this page's margins — the window hands it down.
+    property int pageHeight: 0
+
+    readonly property int _pinRowH: 38
+    readonly property int _pinCap: Math.max(120, Math.round(root.pageHeight * 0.42))
+    // If the pane is ever shorter than the page's minimum, let the outer
+    // flickable scroll rather than squeezing the cards into nothing.
+    readonly property int _minPageH: 320
 
     function iconSource(entry) {
         if (!entry || !entry.icon)
@@ -19,11 +31,64 @@ ColumnLayout {
         return p.indexOf("://") !== -1 ? p : "file://" + p;
     }
 
+    function movePin(index, delta) {
+        const arr = root.config.pinned.slice();
+        const next = index + delta;
+        if (next < 0 || next >= arr.length)
+            return;
+        const item = arr.splice(index, 1)[0];
+        arr.splice(next, 0, item);
+        root.config.setPinnedOrder(arr);
+    }
+
+    Layout.preferredHeight: root.pageHeight > 0
+        ? Math.max(root.pageHeight, root._minPageH) : -1
     spacing: 0
 
+    // 24px round-corner hit target with a mono glyph; danger flips the hover
+    // colour to red for destructive actions.
+    component IconBtn: Rectangle {
+        id: btn
+        required property var theme
+        property string glyph: ""
+        property bool enabledBtn: true
+        property bool danger: false
+        signal clicked()
+
+        Layout.preferredWidth: 24
+        Layout.preferredHeight: 24
+        radius: theme.radiusControl
+        opacity: btn.enabledBtn ? 1 : 0.3
+        color: btnMa.containsMouse && btn.enabledBtn
+            ? (btn.danger
+               ? Qt.rgba(theme.brightRed.r, theme.brightRed.g, theme.brightRed.b, 0.14)
+               : theme.hoverFill)
+            : "transparent"
+
+        Text {
+            anchors.centerIn: parent
+            text: btn.glyph
+            color: btnMa.containsMouse && btn.enabledBtn
+                ? (btn.danger ? btn.theme.brightRed : btn.theme.accent)
+                : btn.theme.mutedText
+            font.pixelSize: 13
+            font.family: btn.theme.fontMono
+        }
+
+        MouseArea {
+            id: btnMa
+            anchors.fill: parent
+            hoverEnabled: true
+            enabled: btn.enabledBtn
+            cursorShape: btn.enabledBtn ? Qt.PointingHandCursor : Qt.ArrowCursor
+            onClicked: btn.clicked()
+        }
+    }
+
+    // ---------- pinned ----------
     RowLayout {
         Layout.fillWidth: true
-        Layout.bottomMargin: 14
+        Layout.bottomMargin: 12
         spacing: 12
 
         DSectionLabel {
@@ -33,6 +98,17 @@ ColumnLayout {
         }
 
         Text {
+            visible: root.config.pinned.length > 1
+            Layout.alignment: Qt.AlignVCenter
+            text: "arrows or drag dock icons to reorder"
+            color: root.theme.mutedText
+            font.pixelSize: 10
+            font.family: root.theme.fontMono
+            elide: Text.ElideRight
+        }
+
+        Text {
+            Layout.alignment: Qt.AlignVCenter
             text: root.config.pinned.length
                   + (root.config.pinned.length === 1 ? " app" : " apps")
             color: root.theme.mutedText
@@ -41,26 +117,40 @@ ColumnLayout {
         }
     }
 
-    ColumnLayout {
+    Rectangle {
         Layout.fillWidth: true
-        spacing: 6
+        Layout.preferredHeight: Math.min(
+            Math.max(50, root.config.pinned.length * root._pinRowH + 8),
+            root._pinCap)
+        radius: root.theme.radiusControl
+        color: root.theme.darkerBackground
+        border.color: root.theme.borderFill
+        border.width: 1
+        clip: true
 
-        Repeater {
+        ListView {
+            id: pinnedList
+            anchors.fill: parent
+            anchors.margins: 4
+            spacing: 2
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
             model: root.config.pinned
 
             delegate: Rectangle {
                 required property string modelData
+                required property int index
 
-                Layout.fillWidth: true
-                implicitHeight: 40
+                width: pinnedList.width
+                height: root._pinRowH
                 radius: root.theme.radiusControl
-                color: rowMa.containsMouse ? root.theme.hoverFill : root.theme.normalFill
+                color: pinMa.containsMouse ? root.theme.hoverFill : "transparent"
 
                 RowLayout {
                     anchors.fill: parent
                     anchors.leftMargin: 10
-                    anchors.rightMargin: 8
-                    spacing: 10
+                    anchors.rightMargin: 6
+                    spacing: 6
 
                     Image {
                         Layout.preferredWidth: 22
@@ -80,67 +170,66 @@ ColumnLayout {
                         elide: Text.ElideRight
                     }
 
-                    Rectangle {
-                        Layout.preferredWidth: 26
-                        Layout.preferredHeight: 26
-                        radius: root.theme.radiusControl
-                        color: unpinMa.containsMouse
-                            ? Qt.rgba(root.theme.brightRed.r, root.theme.brightRed.g,
-                                      root.theme.brightRed.b, 0.14)
-                            : "transparent"
+                    IconBtn {
+                        theme: root.theme
+                        glyph: String.fromCodePoint(0xF0143)   // chevron-up
+                        enabledBtn: index > 0
+                        onClicked: root.movePin(index, -1)
+                    }
 
-                        Text {
-                            anchors.centerIn: parent
-                            text: String.fromCodePoint(0xF0156)
-                            color: unpinMa.containsMouse
-                                ? root.theme.brightRed : root.theme.mutedText
-                            font.pixelSize: 12
-                            font.family: root.theme.fontMono
-                        }
+                    IconBtn {
+                        theme: root.theme
+                        glyph: String.fromCodePoint(0xF0140)   // chevron-down
+                        enabledBtn: index < root.config.pinned.length - 1
+                        onClicked: root.movePin(index, 1)
+                    }
 
-                        MouseArea {
-                            id: unpinMa
-                            anchors.fill: parent
-                            hoverEnabled: true
-                            cursorShape: Qt.PointingHandCursor
-                            onClicked: root.config.unpin(modelData)
-                        }
+                    IconBtn {
+                        theme: root.theme
+                        glyph: String.fromCodePoint(0xF0156)   // close
+                        danger: true
+                        onClicked: root.config.unpin(modelData)
                     }
                 }
 
                 MouseArea {
-                    id: rowMa
+                    id: pinMa
                     anchors.fill: parent
-                    anchors.rightMargin: 36
+                    anchors.rightMargin: 96
                     hoverEnabled: true
                 }
             }
         }
 
         Text {
+            anchors.centerIn: parent
             visible: root.config.pinned.length === 0
-            Layout.fillWidth: true
-            Layout.topMargin: 2
-            text: "Nothing pinned yet — pick apps below."
+            text: "Nothing pinned yet — add apps below."
             color: root.theme.mutedText
             font.pixelSize: 12
         }
     }
 
-    Text {
-        visible: root.config.pinned.length > 1
+    // ---------- add apps ----------
+    RowLayout {
         Layout.fillWidth: true
-        Layout.topMargin: 10
-        text: "Drag icons in the dock to reorder them."
-        color: root.theme.mutedText
-        font.pixelSize: 11
-    }
+        Layout.topMargin: 20
+        Layout.bottomMargin: 12
+        spacing: 12
 
-    DSectionLabel {
-        theme: root.theme
-        label: "ADD APPS"
-        Layout.topMargin: 30
-        Layout.bottomMargin: 14
+        DSectionLabel {
+            theme: root.theme
+            label: "ADD APPS"
+            Layout.fillWidth: true
+        }
+
+        Text {
+            Layout.alignment: Qt.AlignVCenter
+            text: appList.count + " shown"
+            color: root.theme.mutedText
+            font.pixelSize: 10
+            font.family: root.theme.fontMono
+        }
     }
 
     DField {
@@ -152,8 +241,9 @@ ColumnLayout {
 
     Rectangle {
         Layout.fillWidth: true
+        Layout.fillHeight: true
+        Layout.minimumHeight: 90
         Layout.topMargin: 10
-        Layout.preferredHeight: 260
         radius: root.theme.radiusControl
         color: root.theme.darkerBackground
         border.color: root.theme.borderFill
@@ -165,6 +255,8 @@ ColumnLayout {
             anchors.fill: parent
             anchors.margins: 4
             spacing: 2
+            clip: true
+            boundsBehavior: Flickable.StopAtBounds
             model: {
                 const q = filter.text.toLowerCase();
                 const out = [];
@@ -183,7 +275,7 @@ ColumnLayout {
                 required property var modelData
 
                 width: appList.width
-                height: 34
+                height: 36
                 radius: root.theme.radiusControl
                 color: addMa.containsMouse ? root.theme.hoverFill : "transparent"
 
@@ -217,10 +309,14 @@ ColumnLayout {
                         font.family: root.theme.fontMono
                     }
 
+                    // A dim pin glyph marks the row as addable; it turns to
+                    // full accent on hover as the "click to pin" affordance.
                     Text {
-                        visible: !root.config.isPinned(modelData.id) && addMa.containsMouse
-                        text: String.fromCodePoint(0xF0415)
-                        color: root.theme.accent
+                        visible: !root.config.isPinned(modelData.id)
+                        text: String.fromCodePoint(0xF0403)   // pin
+                        color: addMa.containsMouse ? root.theme.accent
+                                                   : root.theme.mutedText
+                        opacity: addMa.containsMouse ? 1 : 0.45
                         font.pixelSize: 13
                         font.family: root.theme.fontMono
                     }

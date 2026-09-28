@@ -344,6 +344,10 @@ FloatingWindow {
                         visible: win.currentTab.id === "pinned"
                         config: win.config
                         theme: win.theme
+                        // Pane height minus this page's margins, so the pinned
+                        // list + picker split the viewport instead of stacking
+                        // into one scrollable column.
+                        pageHeight: flick.height - 40
                     }
 
                     AboutTab {
