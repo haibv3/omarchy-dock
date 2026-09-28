@@ -45,7 +45,7 @@ Item {
         anchors.verticalCenter: parent.verticalCenter
         width: 16
         height: 16
-        radius: 8
+        radius: 4
         color: theme.foreground
         border.color: theme.accent
         border.width: ma.containsMouse || ma.pressed ? 2 : 0

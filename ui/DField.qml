@@ -10,7 +10,7 @@ Rectangle {
     signal accepted()
 
     implicitHeight: 34
-    radius: 9
+    radius: 4
     color: theme.darkerBackground
     border.color: input.activeFocus ? theme.accent : theme.borderFill
     border.width: 1
@@ -32,7 +32,7 @@ Rectangle {
             verticalAlignment: Text.AlignVCenter
             visible: input.text.length === 0 && !input.activeFocus
             text: root.placeholder
-            color: theme.muted
+            color: theme.mutedText
             font.pixelSize: 13
         }
     }

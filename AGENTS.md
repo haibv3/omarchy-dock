@@ -51,7 +51,10 @@ dock/
   BarWidget.qml            bar-widget entry (pinned icons only)
 services/
   Config.qml               ~/.config/omarchy-dock/config.json (FileView, watchChanges, atomicWrites)
-  Theme.qml                ~/.local/state/omarchy/current/theme/colors.toml
+  Theme.qml                palette source: config.palette selects
+                           services/signal-dark.tokens.json (W3C tokens,
+                           default) or the host's colors.toml
+  signal-dark.tokens.json  Signal Dark W3C token file, read by Theme.qml
   HyprClients.qml          `hyprctl clients -j` geometry for intellihide
   Globals.qml              settingsOpen flag + `dock` IPC target
 settings/SettingsWindow.qml  FloatingWindow settings UI
@@ -104,7 +107,7 @@ Hyprland.toplevels ───┼─→ AppModel (one per screen) ─→ ListModel
 DesktopEntries ───────┘                                                          │
                                                                         ContextMenu (PopupWindow)
 HyprClients (hyprctl clients -j) ─→ DockWindow.edgeBusy ─→ autohide state machine
-Theme (colors.toml) ─→ every visual
+Theme (signal-dark.tokens.json, or colors.toml when palette="omarchy") ─→ every visual
 ```
 
 - **AppModel** merges `Config.pinned` (ordered) with running toplevels for one
@@ -140,6 +143,9 @@ Theme (colors.toml) ─→ every visual
   `foreground` at low alpha. Do **not** use `lighterBackground` for hovers —
   some themes (e.g. solitude) set it equal to `background`, making hover
   invisible.
+- Secondary/dim **text** uses `theme.mutedText` (readable, ≥4.5:1);
+  `theme.muted` is non-text chrome only (separators, caret glyphs) — it sits
+  at ~4.0:1 on `background` under the Signal Dark palette.
 - `ui/D*.qml` controls take `required property var theme` and emit signals
   (`clicked`, `toggled`, `moved`, `selected`, `valueModified`). They never read
   `config` directly; the caller wires them.

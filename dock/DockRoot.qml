@@ -22,7 +22,7 @@ Item {
     property alias globals: globalsSvc
 
     Config { id: configSvc; standalone: root.canQuit }
-    Theme { id: themeSvc }
+    Theme { id: themeSvc; palette: configSvc.palette }
     HyprClients { id: hyprSvc }
     Globals { id: globalsSvc; canQuit: root.canQuit }
 

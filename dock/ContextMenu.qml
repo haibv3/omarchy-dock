@@ -37,7 +37,7 @@ PopupWindow {
 
     Rectangle {
         anchors.fill: parent
-        radius: 10
+        radius: 8
         color: theme.background
         border.color: theme.borderFill
         border.width: 1
@@ -48,13 +48,28 @@ PopupWindow {
             width: 232
             spacing: 2
 
+            // windows group header — mono caption per Signal Dark
+            Text {
+                visible: root.row && root.row.toplevels.length > 0
+                width: menuCol.width
+                height: visible ? 22 : 0
+                verticalAlignment: Text.AlignVCenter
+                leftPadding: 10
+                text: (root.row ? root.row.toplevels.length : 0)
+                      + (root.row && root.row.toplevels.length > 1 ? " windows" : " window")
+                color: theme.mutedText
+                font.pixelSize: 12
+                font.family: "JetBrains Mono"
+                font.letterSpacing: 1.2
+            }
+
             Repeater {
                 model: root.row ? root.row.toplevels : []
                 delegate: Rectangle {
                     required property var modelData
                     required property int index
                     width: menuCol.width
-                    height: 28
+                    height: 26
                     color: winMa.containsMouse ? theme.hoverFill : "transparent"
                     radius: 4
                     Text {
@@ -91,7 +106,7 @@ PopupWindow {
             // Pin / Unpin
             Rectangle {
                 width: menuCol.width
-                height: 30
+                height: 26
                 color: pinMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 visible: root.row && root.row.desktopId !== ""
@@ -120,7 +135,7 @@ PopupWindow {
             // Close windows
             Rectangle {
                 width: menuCol.width
-                height: 30
+                height: 26
                 color: closeMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 visible: root.row && root.row.running
@@ -156,7 +171,7 @@ PopupWindow {
             // Settings
             Rectangle {
                 width: menuCol.width
-                height: 30
+                height: 26
                 color: setMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 Text {
@@ -184,7 +199,7 @@ PopupWindow {
             Rectangle {
                 visible: config.enabled
                 width: menuCol.width
-                height: 30
+                height: 26
                 color: offMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 Text {
@@ -211,7 +226,7 @@ PopupWindow {
             Rectangle {
                 visible: root.canQuit
                 width: menuCol.width
-                height: 30
+                height: 26
                 color: quitMa.containsMouse ? theme.hoverFill : "transparent"
                 radius: 4
                 Text {

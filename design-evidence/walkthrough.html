@@ -1,0 +1,744 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Omarchy Dock — UX walkthrough · Signal Dark</title>
+<style>
+:root{
+  /* ---- Signal Dark tokens (source of truth: design-tokens artifact) ---- */
+  --bg:#0c0e12; --fg:#e6e9ef; --surface:#14171d; --surface-raised:#191d26;
+  --muted:#6b7280;           /* non-text chrome only — 3.7–4.0:1 */
+  --muted-text:#8b93a1;      /* extended: 5.8:1 on surface — minimum for readable secondary text */
+  --accent:#4ade80; --accent-dim:#22472f; --accent-text:#1a3a27;
+  --border:#232833;
+  --danger:#f87171;
+  --radius:4px; --radius-lg:8px;
+  --fill-hover:rgba(230,233,239,.07);
+  --fill-active:rgba(230,233,239,.11);
+  --fill-accent:rgba(74,222,128,.14);
+  --sans:Inter,system-ui,"Segoe UI",sans-serif;
+  --mono:"JetBrains Mono","SF Mono",Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--fg);font-family:var(--sans);font-size:13px;
+     display:flex;flex-direction:column;overflow:hidden}
+::selection{background:rgba(74,222,128,.3)}
+button{font-family:inherit;cursor:pointer}
+
+/* ============ shell ============ */
+.topbar{height:48px;flex:0 0 48px;display:flex;align-items:center;gap:12px;
+  padding:0 14px;border-bottom:1px solid var(--border);background:var(--surface)}
+.topbar .mark{width:18px;height:18px;border:1px solid var(--accent);border-radius:var(--radius);
+  display:grid;place-items:center;color:var(--accent);font:700 12px var(--mono)}
+.topbar .t1{font-weight:700;font-size:13px;letter-spacing:.02em}
+.topbar .t2{color:var(--muted-text);font-size:12px}
+.topbar .chip{margin-left:auto;font:600 12px var(--mono);color:var(--accent);
+  border:1px solid var(--accent-dim);border-radius:999px;padding:3px 12px;background:var(--fill-accent)}
+
+.app{flex:1;display:flex;min-height:0}
+
+/* ============ left rail ============ */
+.rail{width:272px;flex:0 0 272px;border-right:1px solid var(--border);background:#0f1218;
+  overflow-y:auto;padding:12px 12px}
+.flow-label{font:700 12px var(--mono);color:var(--muted-text);letter-spacing:.14em;
+  padding:14px 8px 6px;text-transform:uppercase}
+.nav-item{display:flex;align-items:baseline;gap:12px;width:100%;text-align:left;
+  background:none;border:0;border-left:2px solid transparent;border-radius:0 var(--radius) var(--radius) 0;
+  padding:7px 8px;color:var(--fg)}
+.nav-item:hover{background:var(--fill-hover)}
+.nav-item.active{background:var(--fill-accent);border-left-color:var(--accent)}
+.nav-item .sid{font:600 12px var(--mono);color:var(--accent);min-width:32px}
+.nav-item:not(.active) .sid{color:var(--muted-text)}
+.nav-item .nm{font-size:12.5px}
+.rail-foot{margin-top:16px;padding:12px 8px;border-top:1px solid var(--border);
+  color:var(--muted-text);font-size:12px;line-height:1.5}
+.rail-foot kbd{font:600 12px var(--mono);border:1px solid var(--border);border-radius:3px;padding:0 4px}
+
+/* ============ main pane ============ */
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.chrome{border-bottom:1px solid var(--border);padding:12px 18px 12px;background:var(--bg)}
+.chrome-row{display:flex;align-items:baseline;gap:12px;flex-wrap:wrap}
+.chrome .sid{font:700 15px var(--mono);color:var(--accent)}
+.chrome h1{font-size:15px;font-weight:700;letter-spacing:.01em}
+.chrome .opens{color:var(--muted-text);font-size:12px;width:100%;margin-top:2px}
+.chrome .opens::before{content:"opens: ";color:var(--muted-text);font:600 12px var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.chrome2{display:flex;align-items:center;gap:14px;flex-wrap:wrap;margin-top:12px}
+.hint{font-size:12px;color:var(--fg);background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:5px 12px}
+.hint b{color:var(--accent)}
+.states{display:flex;gap:6px;flex-wrap:wrap;align-items:center}
+.states .lab{font:600 12px var(--mono);color:var(--muted-text);letter-spacing:.12em;margin-right:2px}
+.state-chip{border:1px solid var(--border);background:var(--surface);color:var(--muted-text);
+  font:600 12px var(--mono);border-radius:999px;padding:5px 12px;min-height:24px}
+.state-chip:hover{color:var(--fg);border-color:var(--muted)}
+.state-chip.on{background:var(--fill-accent);border-color:var(--accent-dim);color:var(--accent)}
+.pn{margin-left:auto;display:flex;gap:6px}
+.pn button{border:1px solid var(--border);background:var(--surface);color:var(--fg);
+  border-radius:var(--radius);padding:5px 12px;font-size:12px;min-height:28px}
+.pn button:hover{border-color:var(--accent-dim);color:var(--accent)}
+.pn button[disabled]{opacity:.35;cursor:default}
+
+.canvas{flex:1;display:grid;place-items:center;overflow:auto;padding:28px;position:relative;
+  background:
+    radial-gradient(1200px 500px at 50% -10%,rgba(74,222,128,.035),transparent 60%),
+    var(--bg)}
+.stage{position:relative;border:1px solid var(--border);border-radius:var(--radius-lg);
+  background:#0a0c10;overflow:hidden;box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.stage .fitnote{position:absolute;right:8px;top:6px;font:600 12px var(--mono);color:var(--muted-text);
+  background:rgba(12,14,18,.8);border:1px solid var(--border);border-radius:3px;padding:1px 6px;z-index:5}
+
+/* ============ fake desktop scene ============ */
+.scene{position:absolute;inset:0}
+.scene .wall{position:absolute;inset:0;
+  background:
+    linear-gradient(transparent 31px,rgba(35,40,51,.35) 32px),
+    linear-gradient(90deg,transparent 31px,rgba(35,40,51,.35) 32px),
+    linear-gradient(160deg,#0d1016,#0a0c10);
+  background-size:32px 32px,32px 32px,cover}
+.appwin{position:absolute;background:var(--surface);border:1px solid var(--border);
+  border-radius:6px;overflow:hidden}
+.appwin .tb{height:24px;background:var(--surface-raised);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;gap:6px;padding:0 8px}
+.appwin .tb i{width:8px;height:8px;border-radius:50%;background:var(--border);display:block}
+.appwin .tb span{font:12px var(--mono);color:var(--muted-text);margin-left:4px}
+.appwin .bd{padding:8px;font:12px/1.7 var(--mono);color:var(--muted-text);white-space:pre}
+.appwin .bd .ok{color:var(--accent)}
+
+/* ============ dock pill ============ */
+.dock{position:absolute;background:rgba(20,23,29,.85);border:1px solid var(--border);
+  border-radius:12px;display:flex;align-items:center;padding:2px}
+.dock.v{flex-direction:column}
+.dock.transparent{background:transparent;border-color:transparent}
+.dock.hidden-x{transform:translateX(-56px)}
+.dock.hidden-y{transform:translateY(56px)}
+.strip{position:absolute;background:var(--accent)}
+.dicon{position:relative;width:28px;height:28px;display:grid;place-items:center;flex:0 0 auto}
+.dicon svg{width:24px;height:24px;display:block}
+.dicon.idle svg{opacity:.55;filter:saturate(.7)}
+.dicon.hover{background:var(--fill-hover);border-radius:var(--radius);outline:1px solid var(--border)}
+.dicon.urgent svg{outline:1.5px solid var(--danger);outline-offset:1px;border-radius:var(--radius)}
+.dicon .dot{position:absolute;bottom:-1px;left:50%;transform:translateX(-50%);
+  width:3px;height:3px;border-radius:50%;background:var(--accent);box-shadow:0 0 5px var(--accent)}
+.dicon .dot.urgent{background:var(--danger);box-shadow:0 0 5px var(--danger)}
+.dock.v .dicon .dot{bottom:auto;left:auto;right:-1px;top:50%;transform:translateY(-50%)}
+.dsep{flex:0 0 auto;align-self:center}
+.dock:not(.v) .dsep{width:1px;height:16px;background:var(--border);margin:0 5px}
+.dock.v .dsep{height:1px;width:16px;background:var(--border);margin:5px 0}
+.ctarget{position:absolute;border:1px dashed var(--accent);border-radius:var(--radius);
+  color:var(--accent);font:600 12px var(--mono);display:grid;place-items:center;
+  background:rgba(74,222,128,.05);letter-spacing:.08em}
+
+/* ============ context menu ============ */
+.menuwrap{position:relative}
+.menustub{position:absolute;background:rgba(20,23,29,.85);border:1px solid var(--border);
+  border-radius:12px;display:flex;align-items:center;padding:2px}
+.menu{position:absolute;width:248px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius-lg);box-shadow:0 16px 40px rgba(0,0,0,.55);padding:4px}
+.menu .mh{font:600 12px var(--mono);letter-spacing:.12em;color:var(--muted-text);
+  padding:5px 12px 3px;text-transform:uppercase}
+.menu .mi{height:26px;display:flex;align-items:center;gap:8px;padding:0 12px;
+  border-radius:var(--radius);font-size:12px;color:var(--fg);white-space:nowrap;overflow:hidden}
+.menu .mi .sub{margin-left:auto;color:var(--muted-text);font:12px var(--mono)}
+.menu .mi:hover{background:var(--fill-hover)}
+.menu .mi.danger{color:var(--danger)}
+.menu .mi.danger:hover{background:rgba(248,113,113,.09)}
+.menu .hr{height:1px;background:var(--border);margin:4px 6px;opacity:.7}
+.menu .tick{width:6px;height:6px;border-radius:2px;background:var(--accent);flex:0 0 auto}
+.menu .tick.off{background:transparent;border:1px solid var(--border)}
+.caret{position:absolute;width:0;height:0;border:6px solid transparent;border-bottom-color:var(--bg);filter:drop-shadow(0 -1px 0 var(--border))}
+
+/* ============ settings window ============ */
+.setwin{width:480px;height:640px;background:var(--bg);border:1px solid var(--border);
+  border-radius:var(--radius-lg);display:flex;flex-direction:column;overflow:hidden;
+  box-shadow:0 24px 60px rgba(0,0,0,.5)}
+.sw-title{height:56px;flex:0 0 auto;display:flex;align-items:center;gap:12px;
+  padding:0 16px;border-bottom:1px solid var(--border);background:var(--surface)}
+.sw-title .wt{font-size:16px;font-weight:700}
+.sw-title .wsub{font:12px var(--mono);color:var(--muted-text);letter-spacing:.08em}
+.sw-close{margin-left:auto;width:28px;height:28px;border:1px solid var(--border);border-radius:var(--radius);
+  background:transparent;color:var(--muted-text);font-size:13px;display:grid;place-items:center}
+.sw-close:hover{color:var(--fg);border-color:var(--muted)}
+.sw-body{flex:1;overflow:hidden;position:relative}
+.sw-scroll{position:absolute;inset:0;overflow-y:auto;padding:16px 18px 24px}
+.sw-fade{position:absolute;left:0;right:0;bottom:0;height:36px;pointer-events:none;
+  background:linear-gradient(transparent,var(--bg));border-top:none}
+.sw-fade .cue{position:absolute;bottom:4px;left:50%;transform:translateX(-50%);
+  font:600 12px var(--mono);color:var(--muted-text);letter-spacing:.12em}
+.sec{font:700 12px var(--mono);letter-spacing:.14em;color:var(--muted-text);
+  margin:18px 0 8px;text-transform:uppercase}
+.sec:first-child{margin-top:0}
+.frow{display:flex;align-items:center;gap:14px;min-height:34px;margin:2px 0}
+.frow>label{width:150px;flex:0 0 150px;font-size:12.5px;color:var(--fg)}
+.frow .ctl{flex:1;display:flex;align-items:center;justify-content:flex-end;gap:12px}
+.helptext{font-size:12px;color:var(--muted-text);line-height:1.5;margin:6px 0 2px}
+.hr{height:1px;background:var(--border);margin:14px 0;opacity:.7}
+
+/* controls */
+.tgl{width:36px;height:20px;border-radius:999px;background:var(--surface-raised);
+  border:1px solid var(--border);position:relative;flex:0 0 auto}
+.tgl .k{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
+  background:var(--muted-text)}
+.tgl.on{background:var(--accent-dim);border-color:var(--accent)}
+.tgl.on .k{left:18px;background:var(--accent)}
+.seg{display:inline-flex;background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);overflow:hidden;flex:1}
+.seg .o{flex:1;height:28px;display:grid;place-items:center;font-size:12px;
+  color:var(--muted-text);border-right:1px solid var(--border);padding:0 12px;white-space:nowrap}
+.seg .o:last-child{border-right:0}
+.seg .o.on{background:var(--fill-accent);color:var(--accent)}
+.sl{flex:1;height:28px;position:relative;display:flex;align-items:center}
+.sl .tr{height:4px;width:100%;background:var(--surface-raised);border-radius:2px;position:relative}
+.sl .fl{position:absolute;left:0;top:0;bottom:0;background:var(--accent);border-radius:2px}
+.sl .kn{position:absolute;top:50%;width:16px;height:16px;border-radius:var(--radius);
+  background:var(--bg);border:2px solid var(--accent);transform:translate(-50%,-50%)}
+.sl-val{width:42px;text-align:right;font:12px var(--mono);color:var(--muted-text)}
+.spin{display:inline-flex;border:1px solid var(--border);border-radius:var(--radius);overflow:hidden}
+.spin button{width:26px;height:28px;background:var(--surface);border:0;color:var(--muted-text);font-size:14px}
+.spin button:hover{color:var(--accent)}
+.spin .v{width:72px;display:grid;place-items:center;font:12px var(--mono);background:var(--bg)}
+.combo{width:190px;height:28px;border:1px solid var(--border);border-radius:var(--radius);
+  background:var(--surface);display:flex;align-items:center;padding:0 12px;font-size:12px}
+.combo .cv{margin-left:auto;color:var(--muted-text);font:12px var(--mono)}
+.field{height:32px;border:1px solid var(--border);border-radius:var(--radius);background:var(--surface);
+  display:flex;align-items:center;gap:8px;padding:0 12px;font-size:12px;color:var(--muted-text)}
+.field .cur{width:1px;height:14px;background:var(--accent)}
+.pinrow{display:flex;align-items:center;gap:12px;height:38px;background:var(--surface);
+  border:1px solid transparent;border-radius:var(--radius);padding:0 8px;margin-bottom:6px}
+.pinrow:hover{background:var(--fill-hover)}
+.pinrow svg{width:20px;height:20px}
+.pinrow .pn-name{flex:1;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.pinrow .un{width:26px;height:26px;border:1px solid transparent;border-radius:var(--radius);
+  background:transparent;color:var(--muted-text);display:grid;place-items:center;font-size:12px}
+.pinrow .un:hover{background:rgba(248,113,113,.14);color:var(--danger)}
+.picker{border:1px solid var(--border);border-radius:var(--radius);background:#0f1218;
+  height:190px;overflow:hidden;position:relative}
+.picker .pl{position:absolute;inset:4px;overflow:hidden}
+.prow{display:flex;align-items:center;gap:12px;height:34px;border-radius:var(--radius);padding:0 12px}
+.prow:hover{background:var(--fill-hover)}
+.prow svg{width:20px;height:20px}
+.prow .an{flex:1;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.prow.dim .an{color:var(--muted-text)}
+.prow .tag{font:600 12px var(--mono);color:var(--accent)}
+.p-empty{position:absolute;inset:0;display:grid;place-items:center;color:var(--muted-text);
+  font-size:12px;text-align:center;line-height:1.6}
+.empty-pins{border:1px dashed var(--border);border-radius:var(--radius);padding:12px;
+  color:var(--muted-text);font-size:12px;margin-bottom:6px}
+
+/* ============ bar widget ============ */
+.barscene{position:absolute;inset:0;background:#0a0c10}
+.ombar{position:absolute;left:0;right:0;top:0;height:26px;background:var(--surface);
+  border-bottom:1px solid var(--border);display:flex;align-items:center;padding:0 8px;gap:6px;
+  font:12px var(--mono);color:var(--muted-text)}
+.ombar .seg-l{display:flex;align-items:center;gap:4px}
+.ombar .mod{padding:0 6px;height:18px;display:flex;align-items:center;border-radius:3px}
+.ombar .ws-on{color:var(--accent);background:var(--fill-accent)}
+.ombar .fill{flex:1}
+.bw-slot{display:flex;align-items:center;height:26px}
+.bw-slot .dicon{width:26px;height:26px}
+.bw-slot .dicon svg{width:12px;height:12px}
+.bw-slot .dicon .dot{bottom:0}
+.bar-note{position:absolute;left:12px;bottom:12px;font:12px var(--mono);color:var(--muted-text);line-height:1.6}
+.legend{position:absolute;left:12px;bottom:12px;right:12px;display:flex;gap:14px;flex-wrap:wrap;
+  font:12px var(--mono);color:var(--muted-text)}
+@media (max-width:640px){
+  .rail{width:200px;flex-basis:200px}
+  .rail .nm{display:none}
+  .nav-item{justify-content:center}
+  .topbar .t2{display:none}
+  .rail-foot{display:none}
+}
+.legend i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:5px;vertical-align:-1px}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="mark">◆</div>
+  <span class="t1">Omarchy Dock</span>
+  <span class="t2">UX walkthrough · Signal Dark · desktop / Linux · Quickshell QML</span>
+  <span class="chip">walkthrough — not a runnable prototype</span>
+</div>
+
+<div class="app">
+  <nav class="rail" id="rail"></nav>
+  <div class="main">
+    <div class="chrome">
+      <div class="chrome-row">
+        <span class="sid" id="c-sid"></span>
+        <h1 id="c-title"></h1>
+      </div>
+      <div class="opens" id="c-opens"></div>
+      <div class="chrome2">
+        <span class="hint" id="c-hint"></span>
+        <div class="states" id="c-states"></div>
+        <div class="pn">
+          <button id="prev">← prev</button>
+          <button id="next">next →</button>
+        </div>
+      </div>
+    </div>
+    <div class="canvas" id="canvas"><div class="stage" id="stage"></div></div>
+  </div>
+</div>
+
+<script>
+"use strict";
+
+/* ---------------- app icons (drawn, no assets) ---------------- */
+const APPS = {
+  firefox:{name:"Firefox", colors:["#ff9f43","#3b82f6"],
+    svg:`<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9" fill="#3b82f6"/><path d="M12 3a9 9 0 0 1 8.2 5.3C18 9.5 16.4 8 14.5 8.2c.8 1 .5 2.4-.6 3.1-1.6 1-3.9.4-4.8-1.1C8.4 11 9 13.6 11 14.9c2.6 1.7 6 .9 7.6-1.6A9 9 0 0 1 12 21a9 9 0 0 1-7.5-13.9A9 9 0 0 1 12 3z" fill="#ff9f43"/></svg>`},
+  terminal:{name:"Terminal", colors:["#4ade80","#14171d"],
+    svg:`<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2.5" fill="#14171d" stroke="#4ade80" stroke-width="1.4"/><path d="M6 8l4 3.5L6 15" stroke="#4ade80" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M12.5 15.5h5" stroke="#4ade80" stroke-width="1.7" stroke-linecap="round"/></svg>`},
+  files:{name:"Files", colors:["#fbbf24","#14171d"],
+    svg:`<svg viewBox="0 0 24 24"><path d="M3.5 6.5a2 2 0 0 1 2-2h4l2 2.5h7a2 2 0 0 1 2 2v8.5a2 2 0 0 1-2 2h-13a2 2 0 0 1-2-2z" fill="#fbbf24"/><path d="M3.5 10h17" stroke="#0c0e12" stroke-width="1" opacity=".25"/></svg>`},
+  chat:{name:"Chat", colors:["#a78bfa","#14171d"],
+    svg:`<svg viewBox="0 0 24 24"><path d="M12 3.5c-4.8 0-8.5 3.2-8.5 7.2 0 4 3.7 7.2 8.5 7.2.7 0 1.4-.1 2-.2l4.3 2.3-1-3.6c1.9-1.3 3.2-3.2 3.2-5.7 0-4-3.7-7.2-8.5-7.2z" fill="#a78bfa"/><circle cx="8.5" cy="10.7" r="1.1" fill="#0c0e12"/><circle cx="12" cy="10.7" r="1.1" fill="#0c0e12"/><circle cx="15.5" cy="10.7" r="1.1" fill="#0c0e12"/></svg>`},
+  code:{name:"Editor", colors:["#38bdf8","#14171d"],
+    svg:`<svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="2.5" fill="#14171d" stroke="#38bdf8" stroke-width="1.4"/><path d="M9 8.5L5.8 12 9 15.5" stroke="#38bdf8" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/><path d="M15 8.5l3.2 3.5-3.2 3.5" stroke="#38bdf8" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round"/></svg>`}
+};
+
+/* rows: [appKey|null, pinned, running, windows[], urgent] */
+const DOCK_ROWS = [
+  {app:"firefox", pinned:true,  running:true,  wins:["GitHub — omp","Mozilla Firefox"], urgent:false},
+  {app:"terminal",pinned:true,  running:true,  wins:["haibachvan@omarchy: ~/Workspace/omarchy-dock"], urgent:false},
+  {app:"files",   pinned:true,  running:false, wins:[], urgent:false},
+  {app:"chat",    pinned:true,  running:true,  wins:["#general — Workspace"], urgent:false},
+  {app:"code",    pinned:false, running:true,  wins:["omarchy-dock — settings/SettingsWindow.qml"], urgent:false}
+];
+
+/* ---------------- renderers ---------------- */
+function iconCell(row, opts={}){
+  const d = document.createElement("div");
+  d.className = "dicon" + (opts.hover ? " hover" : "") + (row.urgent ? " urgent" : "")
+              + ((row.pinned && !row.running) ? " idle" : "");
+  d.innerHTML = APPS[row.app].svg + (row.running ? `<span class="dot${row.urgent?" urgent":""}"></span>` : "");
+  d.title = APPS[row.app].name + (row.running ? ` — ${row.wins.length} window${row.wins.length>1?"s":""}` : " — not running");
+  return d;
+}
+
+function dockPill(vertical, state){
+  const d = document.createElement("div");
+  d.className = "dock" + (vertical?" v":"") + (state==="transparent"?" transparent":"");
+  let seenUnpinned = false;
+  // urgent is a runtime flag on the toplevel, not a property of the icon —
+  // the "urgent" state maps it on; every other state renders rows clean.
+  const rows = state==="urgent"
+    ? DOCK_ROWS.map(r=>r.app==="chat" ? {...r, urgent:true} : r)
+    : DOCK_ROWS;
+  rows.forEach((row,i)=>{
+    if(!row.pinned && !seenUnpinned && i>0){ seenUnpinned=true;
+      const s=document.createElement("div"); s.className="dsep"; d.appendChild(s); }
+    d.appendChild(iconCell(row,{hover: state==="hover" && i===1}));
+  });
+  return d;
+}
+
+function sceneDesktop(dockState){
+  const s=document.createElement("div"); s.className="scene";
+  s.innerHTML=`<div class="wall"></div>
+    <div class="appwin" style="left:64px;top:56px;width:520px;height:300px">
+      <div class="tb"><i></i><i></i><i></i><span>fish — ~/Workspace/omarchy-dock</span></div>
+      <div class="bd">$ qs -p .
+<span class="ok">INFO: Launching config: shell.qml</span>
+INFO: Started logging to /run/user/1000/quickshell/by-id/…/log.qslog
+
+$ hyprctl clients -j | jq '.[].class'
+"firefox"  "foot"  "slack"</div>
+    </div>
+    <div class="appwin" style="right:64px;top:96px;width:300px;height:180px;opacity:.75">
+      <div class="tb"><i></i><i></i><i></i><span>#general — Chat</span></div>
+      <div class="bd">◇ unread: 3</div>
+    </div>`;
+  return s;
+}
+
+/* ---------------- screens ---------------- */
+const SCREENS = [
+{
+  flow:"A · Dock surface", id:"§1", title:"Dock — bottom edge",
+  opens:"Layer-shell surface, always up while autohide = never.",
+  hint:"Main path, 1 of 10. Click the <b>running indicator</b> icon to activate; right-click opens §3.",
+  path:[1,10],
+  states:[{id:"default",label:"default"},{id:"urgent",label:"urgent window"},
+          {id:"hover",label:"hover"},{id:"hidden",label:"hidden · hover strip"},
+          {id:"transparent",label:"transparent background"}],
+  render(stage,state){
+    stage.style.width="1280px"; stage.style.height="560px";
+    stage.appendChild(sceneDesktop());
+    const pill=dockPill(false,state);
+    pill.style.left="50%"; pill.style.bottom="6px"; pill.style.transform="translateX(-50%)";
+    if(state==="hidden"){ pill.classList.add("hidden-y");
+      const st=document.createElement("div"); st.className="strip";
+      st.style.cssText="left:0;right:0;bottom:0;height:4px;opacity:.6"; stage.appendChild(st); }
+    stage.appendChild(pill);
+    if(state==="urgent"){
+      /* urgent flag lives on the Chat row */
+    }
+    if(state==="hover"){
+      const lg=document.createElement("div"); lg.className="legend";
+      lg.innerHTML=`<span><i style="background:var(--fill-hover);border:1px solid var(--border)"></i>hover fill — fg @ 7%</span>
+                    <span><i style="background:var(--accent)"></i>running dot</span>
+                    <span><i style="background:var(--danger)"></i>urgent</span>`;
+      stage.appendChild(lg);
+    }
+    const n=document.createElement("div"); n.className="fitnote"; n.textContent="1920×1080 scene · shown scaled";
+    stage.appendChild(n);
+  }
+},
+{
+  flow:"A · Dock surface", id:"§2", title:"Dock — left edge (vertical)",
+  opens:"Same surface with position = left; icon strip rotates 90°.",
+  hint:"Main path, 2 of 10. Right-click any icon → §3.",
+  path:[2,10],
+  states:[{id:"default",label:"default"},{id:"hidden",label:"hidden · hover strip"}],
+  render(stage,state){
+    stage.style.width="560px"; stage.style.height="640px";
+    stage.appendChild(sceneDesktop());
+    const pill=dockPill(true,state);
+    pill.style.left="6px"; pill.style.top="50%"; pill.style.transform="translateY(-50%)";
+    if(state==="hidden"){ pill.classList.add("hidden-x");
+      const st=document.createElement("div"); st.className="strip";
+      st.style.cssText="left:0;top:0;bottom:0;width:4px;opacity:.6"; stage.appendChild(st); }
+    stage.appendChild(pill);
+    const n=document.createElement("div"); n.className="fitnote"; n.textContent="side edge · shown scaled";
+    stage.appendChild(n);
+  }
+},
+{
+  flow:"A · Dock surface", id:"§3", title:"Context menu — running app",
+  opens:"Right-click a dock icon (row.running).",
+  hint:"Main path, 3 of 10. Click <b>Dock settings…</b> → §5.",
+  path:[3,10],
+  states:[{id:"multi",label:"pinned · 2 windows"},{id:"single",label:"single window"},
+          {id:"idle",label:"pinned · not running"},{id:"unpinned",label:"unpinned · running"},
+          {id:"noentry",label:"unpinned · no .desktop"}],
+  render(stage,state){
+    stage.style.width="480px"; stage.style.height="430px";
+    stage.innerHTML=`<div class="wall" style="position:absolute;inset:0;background:
+      linear-gradient(transparent 31px,rgba(35,40,51,.35) 32px),
+      linear-gradient(90deg,transparent 31px,rgba(35,40,51,.35) 32px),#0a0c10;
+      background-size:32px 32px"></div>`;
+    const wrap=document.createElement("div"); wrap.className="menuwrap"; wrap.style.cssText="position:absolute;inset:0";
+    // stub dock at bottom
+    const stub=document.createElement("div"); stub.className="menustub";
+    stub.style.cssText="left:110px;bottom:14px;";
+    DOCK_ROWS.slice(0,4).forEach(r=>stub.appendChild(iconCell(r)));
+    wrap.appendChild(stub);
+    // caret
+    const caret=document.createElement("div"); caret.className="caret";
+    caret.style.cssText="left:146px;bottom:52px"; wrap.appendChild(caret);
+
+    const m=document.createElement("div"); m.className="menu";
+    m.style.cssText="left:36px;bottom:64px";
+    const cfg={
+      multi:  {wins:["GitHub — omp","Mozilla Firefox"], pinned:true, running:true,  unpinnable:true},
+      single: {wins:["haibachvan@omarchy: ~/Workspace"], pinned:true, running:true,  unpinnable:true},
+      noentry:{wins:["xwayland-helper"], pinned:false, running:true, unpinnable:false},
+      idle:   {wins:[], pinned:true, running:false, unpinnable:true},
+      unpinned:{wins:["omarchy-dock — SettingsWindow.qml"], pinned:false, running:true, unpinnable:true},
+    }[state];
+    let h="";
+    if(cfg.wins.length){
+      h+=`<div class="mh">${cfg.wins.length} window${cfg.wins.length>1?"s":""} — click to activate</div>`;
+      cfg.wins.forEach(w=>h+=`<div class="mi"><span class="tick"></span>${w}</div>`);
+      h+=`<div class="hr"></div>`;
+    }
+    if(cfg.unpinnable) h+=`<div class="mi">${cfg.pinned?"Unpin app":"Pin app"}</div>`;
+    if(cfg.running) h+=`<div class="mi danger">${cfg.wins.length>1?"Close all windows":"Close window"}</div>`;
+    h+=`<div class="hr"></div>
+        <div class="mi">Dock settings…</div>
+        <div class="mi">Turn off dock</div>`;
+    m.innerHTML=h;
+    wrap.appendChild(m);
+    stage.appendChild(wrap);
+    const lg=document.createElement("div"); lg.className="legend";
+    lg.innerHTML=`<span><i style="background:var(--accent)"></i>window row → activate()</span>
+                  <span><i style="background:var(--danger)"></i>destructive</span>`;
+    stage.appendChild(lg);
+  }
+},
+{
+  flow:"A · Dock surface", id:"§4", title:"Context menu — host variants",
+  opens:"Same popup; rows adapt to standalone vs plugin vs menubar mode.",
+  hint:"Main path, 4 of 10. Quit dock exists only in the standalone process.",
+  path:[4,10],
+  states:[{id:"standalone",label:"standalone (canQuit)"},{id:"plugin",label:"omarchy plugin"},
+          {id:"menubar",label:"menubar mode"}],
+  render(stage,state){
+    stage.style.width="480px"; stage.style.height="380px";
+    stage.innerHTML=`<div class="wall" style="position:absolute;inset:0;background:#0a0c10"></div>`;
+    const m=document.createElement("div"); m.className="menu";
+    m.style.cssText="left:120px;top:36px";
+    const v={
+      standalone:{set:"Dock settings…", off:"Turn off dock", quit:true},
+      plugin:    {set:"Dock settings…", off:"Turn off dock", quit:false},
+      menubar:   {set:"Menubar settings…", off:"Turn off menubar icons", quit:false},
+    }[state];
+    m.innerHTML=`<div class="mi">Unpin app</div>
+      <div class="hr"></div>
+      <div class="mi">${v.set}</div>
+      <div class="mi">${v.off}</div>
+      ${v.quit?`<div class="mi danger">Quit dock</div>`:""}`;
+    stage.appendChild(m);
+    const note=document.createElement("div"); note.className="legend";
+    note.innerHTML = state==="standalone"
+      ? `<span>Qt.quit() kills the standalone process — safe to offer</span>`
+      : state==="plugin"
+      ? `<span>Qt.quit() would kill the whole omarchy-shell — row hidden</span>`
+      : `<span>displayMode=menubar relabels rows; no windows list (widget pins only)</span>`;
+    stage.appendChild(note);
+  }
+},
+{
+  flow:"B · Settings", id:"§5", title:"Settings — dock mode",
+  opens:"Context menu → Dock settings…, or omarchy-shell dock toggleSettings.",
+  hint:"Main path, 5 of 10. Scroll column; sections APPEARANCE · BEHAVIOR · PINNED APPS.",
+  path:[5,10],
+  states:[{id:"plugin",label:"omarchy plugin"},{id:"standalone",label:"standalone process"}],
+  render(stage,state){ renderSettings(stage,"dock",{standalone:state==="standalone"}); }
+},
+{
+  flow:"B · Settings", id:"§6", title:"Settings — menubar mode",
+  opens:"Same FloatingWindow; displayMode=menubar re-titles and prunes dock-only rows.",
+  hint:"Main path, 6 of 10. Same controls minus Position/Icon size/Auto-hide/Monitor.",
+  path:[6,10],
+  render(stage){ renderSettings(stage,"menubar",{}); }
+},
+{
+  flow:"B · Settings", id:"§7", title:"Settings — pinned apps states",
+  opens:"PINNED APPS section, bottom of the settings column.",
+  hint:"Main path, 7 of 10. Toggle states to see empty list / filtered picker.",
+  path:[7,10],
+  states:[{id:"normal",label:"3 pins + full picker"},{id:"empty",label:"no pins"},
+          {id:"search",label:"search: “fire”"},{id:"nomatch",label:"search: no matches"}],
+  render(stage,state){ renderSettings(stage,"dock",
+    state==="empty"?{emptyPins:true}
+    :state==="search"?{search:"fire"}
+    :state==="nomatch"?{search:"zzz"}
+    :{}); }
+},
+{
+  flow:"C · Menubar widget", id:"§8", title:"Bar widget — pinned icons",
+  opens:"Omarchy bar slot; displayMode=menubar, pinned rows only.",
+  hint:"Main path, 8 of 10. Right-click → menubar variant of §4.",
+  path:[8,10],
+  states:[{id:"default",label:"default"},{id:"urgent",label:"urgent"}],
+  render(stage,state){
+    stage.style.width="860px"; stage.style.height="140px";
+    stage.innerHTML=`<div class="barscene"></div>
+      <div class="ombar">
+        <div class="seg-l"><span class="mod ws-on">1</span><span class="mod">2</span><span class="mod">3</span></div>
+        <span class="mod">◈ code</span>
+        <div class="fill"></div>`;
+    const slot=document.createElement("div"); slot.className="bw-slot";
+    DOCK_ROWS.filter(r=>r.pinned).forEach(r=>{
+      const c=iconCell(state==="urgent"&&r.app==="chat"?{...r,urgent:true}:r);
+      slot.appendChild(c);
+    });
+    const bar=stage.querySelector(".ombar"); bar.appendChild(slot);
+    bar.insertAdjacentHTML("beforeend",
+      `<span class="mod">⚙</span><span class="mod">12:04</span>`);
+    const n=document.createElement("div"); n.className="bar-note";
+    n.textContent="icons: Style.space(12) raster · strip thickness = barSize (26px) · pinned only";
+    stage.appendChild(n);
+  }
+},
+{
+  flow:"D · Empty & edge", id:"§9", title:"Dock — nothing to show",
+  opens:"config.pinned empty and no running toplevels on the monitor.",
+  hint:"Main path, 9 of 10. Real UI shows a bare pill; design adds a hint cell (proposed).",
+  path:[9,10],
+  states:[{id:"current",label:"as implemented"},{id:"proposed",label:"proposed empty hint"}],
+  render(stage,state){
+    stage.style.width="900px"; stage.style.height="380px";
+    stage.appendChild(sceneDesktop());
+    const pill=document.createElement("div"); pill.className="dock";
+    pill.style.cssText="left:50%;bottom:6px;transform:translateX(-50%);";
+    if(state==="proposed"){
+      pill.innerHTML=`<div style="display:flex;align-items:center;gap:8px;padding:0 12px;height:28px;
+        color:var(--muted-text);font:12px var(--mono)">∅ no apps — right-click → Dock settings to pin</div>`;
+    }
+    stage.appendChild(pill);
+    const n=document.createElement("div"); n.className="fitnote";
+    n.textContent = state==="current" ? "ListModel empty → pill collapses to margin only"
+                                      : "proposed: one-line hint, 0 extra behavior";
+    stage.appendChild(n);
+  }
+},
+{
+  flow:"D · Empty & edge", id:"§10", title:"Dock — disabled / summoned",
+  opens:"config.enabled=false removes the surface; plugin summon forces it visible.",
+  hint:"Main path, 10 of 10. summon → forceVisible overrides autohide.",
+  path:[10,10],
+  states:[{id:"disabled",label:"enabled = false"},{id:"summon",label:"plugin summon (forceVisible)"}],
+  render(stage,state){
+    stage.style.width="1100px"; stage.style.height="420px";
+    stage.appendChild(sceneDesktop());
+    if(state==="summon"){
+      const pill=dockPill(false,"default");
+      pill.style.cssText="left:50%;bottom:6px;transform:translateX(-50%);";
+      stage.appendChild(pill);
+      const t=document.createElement("div"); t.className="ctarget";
+      t.style.cssText="right:24px;top:24px;padding:6px 12px;height:auto";
+      t.textContent="summoned — ignores intellihide until close()";
+      stage.appendChild(t);
+    }else{
+      const n=document.createElement("div"); n.className="fitnote";
+      n.textContent="DockRoot.dockScreens() → [] · no window, no strip, no exclusive zone";
+      stage.appendChild(n);
+      const t=document.createElement("div"); t.className="ctarget";
+      t.style.cssText="right:24px;top:24px;padding:6px 12px;height:auto";
+      t.textContent="re-enable: app launcher → Omarchy Dock";
+      stage.appendChild(t);
+    }
+  }
+}
+];
+
+/* ---------------- settings renderer ---------------- */
+function renderSettings(stage,mode,opt={}){
+  stage.style.width="480px"; stage.style.height="640px"; stage.style.background="transparent"; stage.style.border="0"; stage.style.boxShadow="none";
+  const menubar = mode==="menubar";
+  const standalone = !!opt.standalone;
+  const w=document.createElement("div"); w.className="setwin";
+  const pinsEmpty = !!opt.emptyPins;
+  const q = opt.search || "";
+  w.innerHTML=`
+    <div class="sw-title">
+      <span class="wt">${menubar?"Menubar apps":"Dock"}</span>
+      <span class="wsub">${standalone?"standalone · shell.qml":menubar?"omarchy-dock-menubar":"omarchy-dock"} · settings</span>
+      <button class="sw-close">✕</button>
+    </div>
+    <div class="sw-body"><div class="sw-scroll">
+      <div class="sec">General</div>
+      <div class="frow"><label>${menubar?"Show in bar":"Show dock"}</label>
+        <div class="ctl"><span class="tgl on"><span class="k"></span></span></div></div>
+
+      <div class="sec">Appearance</div>
+      <div class="frow"><label>Palette</label><div class="ctl" style="flex:1">
+        <span class="seg"><span class="o on">Signal Dark</span><span class="o">Omarchy</span></span></div></div>
+      ${(menubar||standalone)?"":`
+      <div class="frow"><label>Show in</label><div class="ctl" style="flex:1">
+        <span class="seg"><span class="o on">Dock</span><span class="o">Menubar</span></span></div></div>
+      <div class="frow"><label>Position</label><div class="ctl" style="flex:1">
+        <span class="seg"><span class="o">Top</span><span class="o on">Bottom</span><span class="o">Left</span><span class="o">Right</span></span></div></div>
+      <div class="frow"><label>Icon size</label><div class="ctl" style="flex:1">
+        <span class="sl"><span class="tr"><span class="fl" style="width:0%"></span><span class="kn" style="left:2%"></span></span></span>
+        <span class="sl-val">24px</span></div></div>
+      <div class="frow"><label>Transparent background</label>
+        <div class="ctl"><span class="tgl"><span class="k"></span></span></div></div>`}
+
+      <div class="sec">Behavior</div>
+      ${menubar?"":`
+      <div class="frow"><label>Auto-hide</label><div class="ctl" style="flex:1">
+        <span class="seg"><span class="o">Never</span><span class="o">Delay</span><span class="o on">Smart</span></span></div></div>`}
+      <div class="frow"><label>Start on login</label>
+        <div class="ctl"><span class="tgl on"><span class="k"></span></span></div></div>
+      <div class="helptext">${standalone
+        ? "Off hides the dock until you turn it back on here. Start on login writes ~/.config/hypr/autostart.lua."
+        : menubar
+        ? "Off removes the pinned-app widget from the bar. Turn it back on here or from Omarchy menu → Setup → Plugins."
+        : "Off disables the Omarchy Dock plugin, which closes this window too. Re-enable it from the app launcher (Omarchy Dock) or Omarchy menu → Setup → Plugins."}</div>
+      ${menubar?"":`
+      <div class="frow"><label>Hide delay</label><div class="ctl">
+        <span class="spin"><button>−</button><span class="v">400 ms</span><button>+</button></span></div></div>
+      <div class="frow"><label>Monitor</label><div class="ctl">
+        <span class="combo">All monitors<span class="cv">▾</span></span></div></div>`}
+
+      <div class="hr"></div>
+      <div class="sec">Pinned apps</div>
+      ${pinsEmpty?`<div class="empty-pins">No pinned apps — add some below.</div>`
+        :["firefox","terminal","files"].map(k=>`
+        <div class="pinrow">${APPS[k].svg}<span class="pn-name">${APPS[k].name}</span>
+          <button class="un">✕</button></div>`).join("")}
+      <div class="field"><span style="color:var(--muted-text)">⌕</span>
+        ${q?`<span style="color:var(--fg)">${q}</span><span class="cur"></span>`:`Search applications…`}</div>
+      <div class="picker" style="margin-top:8px"><div class="pl">
+        ${pickerRows(q)}
+      </div>${q&&pickerCount(q)===0?`<div class="p-empty">No applications match “${q}”</div>`:""}</div>
+    </div>
+    <div class="sw-fade"><span class="cue">▼ scroll</span></div></div>`;
+  stage.appendChild(w);
+}
+const PICKER=[
+  ["firefox","Firefox",true],["chat","Chat",false],["code","Editor",false],
+  ["files","Files",true],["terminal","Terminal",true],
+];
+function pickerRows(q){
+  const list = q ? PICKER.filter(p=>p[1].toLowerCase().includes(q)) : PICKER;
+  return list.map(([k,n,pinned])=>`
+    <div class="prow${pinned?" dim":""}">${APPS[k].svg}<span class="an">${n}</span>
+    ${pinned?`<span class="tag">pinned</span>`:""}</div>`).join("");
+}
+function pickerCount(q){ return PICKER.filter(p=>p[1].toLowerCase().includes(q)).length; }
+
+/* ---------------- navigation ---------------- */
+const rail=document.getElementById("rail");
+let cur=0, curState={};
+let lastFlow="";
+SCREENS.forEach((s,i)=>{
+  if(s.flow!==lastFlow){ lastFlow=s.flow;
+    const l=document.createElement("div"); l.className="flow-label"; l.textContent=s.flow; rail.appendChild(l);}
+  const b=document.createElement("button"); b.className="nav-item"; b.dataset.i=i;
+  b.innerHTML=`<span class="sid">${s.id}</span><span class="nm">${s.title}</span>`;
+  b.onclick=()=>go(i); rail.appendChild(b);
+});
+const foot=document.createElement("div"); foot.className="rail-foot";
+foot.innerHTML=`Keyboard: <kbd>←</kbd><kbd>→</kbd> screens · <kbd>↑</kbd><kbd>↓</kbd> states.<br>
+Canvas renders at real window size, scaled to fit.`;
+rail.appendChild(foot);
+
+function go(i,stateId){
+  cur=i; const s=SCREENS[i];
+  curState[i]=stateId||(s.states?s.states[0].id:null);
+  document.querySelectorAll(".nav-item").forEach(n=>n.classList.toggle("active",+n.dataset.i===i));
+  document.getElementById("c-sid").textContent=s.id;
+  document.getElementById("c-title").textContent=s.title;
+  document.getElementById("c-opens").textContent=s.opens;
+  document.getElementById("c-hint").innerHTML=s.hint;
+  document.getElementById("prev").disabled=i===0;
+  document.getElementById("next").disabled=i===SCREENS.length-1;
+  const st=document.getElementById("c-states"); st.innerHTML="";
+  if(s.states){
+    st.insertAdjacentHTML("beforeend",`<span class="lab">STATES</span>`);
+    s.states.forEach(o=>{
+      const c=document.createElement("button"); c.className="state-chip"+(o.id===curState[i]?" on":"");
+      c.textContent=o.label; c.onclick=()=>go(i,o.id); st.appendChild(c);
+    });
+  }
+  const stage=document.getElementById("stage");
+  stage.innerHTML=""; stage.removeAttribute("style");
+  s.render(stage,curState[i]);
+  // scale to fit
+  const cv=document.getElementById("canvas");
+  let fb=document.getElementById("fitbox");
+  if(!fb){ fb=document.createElement("div"); fb.id="fitbox"; fb.style.cssText="position:relative;overflow:hidden";
+    cv.appendChild(fb); }
+  fb.appendChild(stage);
+  const pad=56;
+  const sc=Math.min(1,Math.max(.42,(cv.clientWidth-pad)/stage.offsetWidth),(cv.clientHeight-pad)/stage.offsetHeight);
+  fb.style.width=stage.offsetWidth*sc+"px";
+  fb.style.height=stage.offsetHeight*sc+"px";
+  stage.style.transformOrigin="top left";
+  stage.style.transform=`scale(${sc})`;
+}
+document.getElementById("prev").onclick=()=>cur>0&&go(cur-1);
+document.getElementById("next").onclick=()=>cur<SCREENS.length-1&&go(cur+1);
+addEventListener("keydown",e=>{
+  if(e.key==="ArrowRight") go(Math.min(SCREENS.length-1,cur+1));
+  if(e.key==="ArrowLeft") go(Math.max(0,cur-1));
+  if(e.key==="ArrowDown"||e.key==="ArrowUp"){
+    const s=SCREENS[cur]; if(!s.states)return;
+    const j=s.states.findIndex(o=>o.id===curState[cur]);
+    const k=e.key==="ArrowDown"?(j+1)%s.states.length:(j-1+s.states.length)%s.states.length;
+    go(cur,s.states[k].id);
+  }
+});
+addEventListener("resize",()=>go(cur,curState[cur]));
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+{
+  "notes": [
+    {
+      "id": "n1",
+      "scope": "whole design",
+      "decision": "Extend the Signal Dark palette with a second muted text color",
+      "did": "Added --muted-text #8b93a1 for all readable secondary text; kept --muted #6b7280 for non-text chrome only",
+      "why": "#6b7280 on #0c0e12 measures 4.0:1 and on #14171d 3.7:1 — below the 4.5:1 text threshold enforced on rendered output",
+      "traded": "Two muted tokens to maintain instead of one; designers must pick the right one per use",
+      "instead": "Leaving #6b7280 as body/secondary text would fail the enforced contrast check",
+      "basis": "Measured WCAG ratios; workspace design checks require >=4.5:1 for text",
+      "anchor": {
+        "kind": "dom",
+        "selector": ":root",
+        "file": "design-evidence/walkthrough.html"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n2",
+      "scope": "whole design",
+      "decision": "Square the radii: dock pill 16px->12px visual language, controls/menu to 4px",
+      "did": "Radius tokens set to 4px (control) and 8px (window/popup); the dock pill drawn at 12px as the single soft exception so it still reads as a floating pill",
+      "why": "Signal Dark signature is a dense console; fully-square pill looked like a toolbar, not a dock",
+      "traded": "One radius value (12px) lives outside the 4px token — mild inconsistency, visible only on the pill",
+      "instead": "4px everywhere read as a toolbar strip, not a dock; 16px read too bubbly for a console aesthetic",
+      "basis": "Signal Dark shape spec (--radius 4px) vs. platform convention that a dock floats",
+      "anchor": {
+        "kind": "plan",
+        "section": "screens §1-§4"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n3",
+      "scope": "§1, §2",
+      "decision": "Add a 1px divider between pinned and running-only icon groups",
+      "did": "Drew a hairline separator before the first unpinned-running row in the dock pill",
+      "why": "The current ListView renders both groups indistinguishable; users cannot see why some icons are draggable and others are not",
+      "traded": "One extra painted element; breaks the dead-flat icon row with a rule",
+      "instead": "Could use spacing only, but a hairline reads better at 26px thickness and costs nothing",
+      "basis": "DockView: model order is pinned-then-running; only pinned rows are reorderable",
+      "anchor": {
+        "kind": "file",
+        "path": "dock/DockView.qml"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n4",
+      "scope": "§1-§4",
+      "decision": "Propose tooltip/mono window-count caption on icon hover",
+      "did": "Icon title attribute shown in walkthrough notes; hover state adds outline + fill",
+      "why": "DockIcon exposes no title text today; window count is only visible via right-click",
+      "traded": "New element to implement in QML if accepted",
+      "instead": "Status quo: count only inside the context menu, which hides information behind a click",
+      "basis": "AppModel row.toplevels length already computed",
+      "anchor": {
+        "kind": "file",
+        "path": "dock/DockIcon.qml"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n5",
+      "scope": "§9",
+      "decision": "Propose one-line empty-dock hint instead of a bare 2px pill",
+      "did": "Empty state draws a mono 'no apps — right-click → Dock settings to pin' cell",
+      "why": "With zero rows the dock collapses to a margin-only sliver users cannot discover",
+      "traded": "New visible element where the app currently shows nothing",
+      "instead": "Current behavior: dock shrinks to an invisible 2px pill — functional but undiscoverable",
+      "basis": "DockView.implicitWidth formula yields ~2px when model.count = 0",
+      "anchor": {
+        "kind": "file",
+        "path": "dock/DockView.qml"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n6",
+      "scope": "§5-§7",
+      "decision": "Keep settings as one scrolling column; add scrollbar-affordance fade + scroll cue",
+      "did": "Bottom fade gradient with 'scroll' cue on the 480x640 window",
+      "why": "PINNED APPS sits below the fold; no affordance exists today",
+      "traded": "Slight decorative element at the bottom edge",
+      "instead": "Tabs would break the dense single-column console feel and add navigation chrome",
+      "basis": "SettingsWindow.qml uses one Flickable column; minimumSize allows 480px height",
+      "anchor": {
+        "kind": "file",
+        "path": "settings/SettingsWindow.qml"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n7",
+      "scope": "§8",
+      "decision": "Bar widget keeps 12px raster icons at 26px bar height — no size change",
+      "did": "Drew widget at Style.space(12) icon / 26px slot, optically centered",
+      "why": "Bar contract is the host's metric; the widget must not re-size itself",
+      "traded": "Icons are small (12px) — inherent to Omarchy bar density, not a choice here",
+      "instead": "Larger icons would overflow the bar and break the optical centering the thickness property exists for",
+      "basis": "BarWidget.qml: iconSize = Style.space(12)+4, thickness = bar.barSize",
+      "anchor": {
+        "kind": "file",
+        "path": "dock/BarWidget.qml"
+      },
+      "status": "agreed",
+      "createdAt": "2026-09-28T15:32:00+07:00"
+    },
+    {
+      "id": "n8",
+      "scope": "§3, §5, §8",
+      "decision": "Model the three hosts as state toggles, not separate screens",
+      "did": "§4 covers context-menu host differences (Quit row, labels); §5 gains a standalone state that hides 'Show in' and swaps the helptext; §8 stays a separate screen because it is a different host surface",
+      "why": "Behavior (flows, data, conditions like desktopId !== '') is identical across hosts — only which rows render changes; duplicating screens would imply different flows",
+      "traded": "Reviewers must toggle states to see every host — one click per variant",
+      "instead": "Three separate catalog entries would triple the rail for one window",
+      "basis": "ContextMenu visible-conditions on canQuit/displayMode; SettingsWindow activeDisplayMode",
+      "anchor": {
+        "kind": "file",
+        "path": "design-evidence/walkthrough.html"
+      },
+      "status": "unanswered",
+      "createdAt": "2026-09-28T15:45:00+07:00"
+    }
+    ,
+    {
+      "id": "n9",
+      "scope": "whole app",
+      "decision": "Ship Signal Dark as the default palette read from a W3C token file, with host-theme colors as opt-in",
+      "did": "services/signal-dark.tokens.json holds the tokens; Theme.qml parses it into the existing theme.* roles; config.palette='signal'|'omarchy' + a Palette segmented row in settings switches sources; property defaults encode Signal Dark so a missing file degrades to the same palette",
+      "why": "The design mandates the exact Signal Dark hexes; leaving colors to the host colors.toml made the palette theme-dependent",
+      "traded": "New config key, a new settings row, and a second colors.toml code path (kept, guarded behind palette)",
+      "instead": "Hard-coding hexes inside Theme.qml — rejected: tokens must live in the W3C JSON source",
+      "basis": "Design-system brief requires referencing tokens; Omarchy integration preserved via palette='omarchy'",
+      "anchor": {"kind": "file", "path": "services/signal-dark.tokens.json"},
+      "status": "unanswered",
+      "createdAt": "2026-09-28T16:15:00+07:00"
+    }
+  ]
+}

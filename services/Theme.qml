@@ -2,9 +2,14 @@ import QtQuick
 import Quickshell
 import Quickshell.Io
 
-// Reads the active Omarchy theme's colors.toml.
-// ~/.local/state/omarchy/current/theme is a symlink that gets retargeted on
-// theme-set, so we watch theme.name (a regular file) and re-resolve the path.
+// Two palette sources:
+//   "signal"  — Signal Dark tokens, read from signal-dark.tokens.json (W3C
+//               token format) next to this file; ships with the plugin.
+//   "omarchy" — the host theme's colors.toml (~/.local/state/omarchy/current/
+//               theme is a symlink retargeted on theme-set, so we watch
+//               theme.name and re-resolve the path).
+// Property defaults already encode Signal Dark, so a missing token file
+// degrades to the same palette.
 QtObject {
     id: root
 
@@ -12,18 +17,21 @@ QtObject {
     readonly property string colorsPath: stateDir + "/theme/colors.toml"
 
     property string mode: "dark"
-    property color accent: "#89b4fa"
-    property color background: "#1e1e2e"
-    property color darkerBackground: "#101019"
-    property color lighterBackground: "#313244"
-    property color foreground: "#cdd6f4"
-    property color darkForeground: "#6c7086"
-    property color selection: "#45475a"
-    property color muted: "#585b70"
-    property color red: "#f38ba8"
-    property color yellow: "#f9e2af"
-    property color green: "#a6e3a1"
-    property color brightRed: "#de6145"
+    property color accent: "#4ade80"
+    property color background: "#0c0e12"
+    property color darkerBackground: "#14171d"
+    property color lighterBackground: "#191d26"
+    property color foreground: "#e6e9ef"
+    property color darkForeground: "#8b93a1"
+    property color selection: "#22472f"
+    property color muted: "#6b7280"
+    // Readable secondary text (5.8:1+); `muted` stays reserved for non-text
+    // chrome (separators, carets) since it only reaches 4.0:1 on bg.
+    property color mutedText: "#8b93a1"
+    property color red: "#f87171"
+    property color yellow: "#fbbf24"
+    property color green: "#4ade80"
+    property color brightRed: "#f87171"
 
     // State fills — the shell composites foreground at low alpha rather
     // than trusting lighter_background (some themes, e.g. solitude, set
@@ -33,7 +41,43 @@ QtObject {
     readonly property color trackFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.14)
     readonly property color borderFill: Qt.rgba(foreground.r, foreground.g, foreground.b, 0.16)
 
+    // Palette source. "signal" maps the Signal Dark token palette onto the
+    // same roles (dark console, single electric accent); "omarchy" follows
+    // the host theme's colors.toml. Roles keep their names — only values swap.
+    property string palette: "signal"
+    onPaletteChanged: {
+        if (palette === "signal")
+            tokensFile.reload();   // onLoaded applies the token values
+        else
+            colorsFile.reload();   // re-parse colors.toml into the roles
+    }
+    property var _signalTokens: null
+
+    // Map W3C token paths onto the existing role names; missing keys keep
+    // the Signal Dark defaults declared above.
+    function _applySignal() {
+        if (!_signalTokens)
+            return;
+        const t = _signalTokens.color || {};
+        const v = k => (t[k] && t[k].$value) ? t[k].$value : undefined;
+        mode = "dark";
+        if (v("accent")) accent = v("accent");
+        if (v("bg")) background = v("bg");
+        if (v("surface")) darkerBackground = v("surface");
+        if (v("surface-raised")) lighterBackground = v("surface-raised");
+        if (v("fg")) foreground = v("fg");
+        if (v("muted-text")) darkForeground = v("muted-text");
+        if (v("accent-dim")) selection = v("accent-dim");
+        if (v("muted")) muted = v("muted");
+        if (v("muted-text")) mutedText = v("muted-text");
+        if (v("danger")) red = v("danger");
+        if (v("warning")) yellow = v("warning");
+        if (v("accent")) green = v("accent");
+        if (v("danger")) brightRed = v("danger");
+    }
     function _parse(toml) {
+        if (root.palette === "signal")
+            return;   // fixed palette — colors.toml must not overwrite it
         const map = {};
         for (const line of toml.split("\n")) {
             const m = line.match(/^\s*([A-Za-z_]+)\s*=\s*"([^"]*)"/);
@@ -54,6 +98,9 @@ QtObject {
         if (c("yellow")) yellow = map["yellow"];
         if (c("green")) green = map["green"];
         if (c("bright_red")) brightRed = map["bright_red"];
+        // colors.toml has no muted-text key — secondary text follows the
+        // theme's own dim foreground.
+        mutedText = darkForeground;
     }
 
     // theme.name changes on every theme-set → force colors.toml reload by
@@ -77,5 +124,27 @@ QtObject {
         onLoaded: root._parse(colorsFile.text())
         onLoadFailed: console.warn("omarchy-dock: colors.toml not found at", path)
         onFileChanged: colorsFile.reload()
+    }
+
+    // W3C token file shipped in services/ — resolved relative to this QML so
+    // it works standalone and inside the plugin dir.
+    readonly property string tokensPath:
+        Qt.resolvedUrl("signal-dark.tokens.json").toString().replace("file://", "")
+
+    property FileView tokensFile: FileView {
+        id: tokensFile
+        path: root.tokensPath
+        watchChanges: true
+        onLoaded: {
+            try {
+                root._signalTokens = JSON.parse(tokensFile.text());
+            } catch (e) {
+                console.warn("omarchy-dock: bad signal-dark.tokens.json, keeping defaults:", e);
+            }
+            if (root.palette === "signal")
+                root._applySignal();
+        }
+        onLoadFailed: console.warn("omarchy-dock: signal-dark.tokens.json not found, using defaults")
+        onFileChanged: tokensFile.reload()
     }
 }

@@ -83,6 +83,7 @@ FloatingWindow {
         color: theme.darkForeground
         font.pixelSize: 11
         font.bold: true
+        font.family: "JetBrains Mono"
         font.letterSpacing: 1.4
     }
 
@@ -102,7 +103,7 @@ FloatingWindow {
         Layout.fillWidth: true
         spacing: 16
         Text {
-            Layout.preferredWidth: 110
+            Layout.preferredWidth: 140
             text: label
             color: theme.foreground
             font.pixelSize: 13
@@ -118,6 +119,7 @@ FloatingWindow {
         anchors.fill: parent
         contentHeight: col.implicitHeight
         clip: true
+
 
         ColumnLayout {
             id: col
@@ -186,6 +188,20 @@ FloatingWindow {
                 }
 
                 FormRow {
+                    label: "Palette"
+                    DSegmented {
+                        theme: win.theme
+                        width: parent.width
+                        options: [
+                            { label: "Signal Dark", value: "signal" },
+                            { label: "Omarchy", value: "omarchy" }
+                        ]
+                        currentValue: config.palette
+                        onSelected: v => config.palette = v
+                    }
+                }
+
+                FormRow {
                     visible: win.activeDisplayMode === "dock"
                     label: "Position"
                     DSegmented {
@@ -221,6 +237,7 @@ FloatingWindow {
                             text: config.iconSize + "px"
                             color: theme.darkForeground
                             font.pixelSize: 12
+                            font.family: "JetBrains Mono"
                         }
                     }
                 }
@@ -281,7 +298,7 @@ FloatingWindow {
                     text: win.activeDisplayMode === "menubar"
                         ? "Off removes the pinned-app widget from the bar. Turn it back on here or from Omarchy menu → Setup → Plugins."
                         : "Off disables the Omarchy Dock plugin, which closes this window too. Re-enable it from the app launcher (Omarchy Dock) or Omarchy menu → Setup → Plugins."
-                    color: theme.muted
+                    color: theme.mutedText
                     font.pixelSize: 11
                 }
 
@@ -339,7 +356,7 @@ FloatingWindow {
                         required property int index
                         Layout.fillWidth: true
                         height: 38
-                        radius: 8
+                        radius: 4
                         color: pinMa.containsMouse ? theme.hoverFill
                                                    : theme.darkerBackground
                         RowLayout {
@@ -374,14 +391,15 @@ FloatingWindow {
                             Rectangle {
                                 width: 26
                                 height: 26
-                                radius: 6
-                                color: unpinMa.containsMouse ? theme.brightRed
-                                                             : "transparent"
+                                radius: 4
+                                color: unpinMa.containsMouse
+                                    ? Qt.rgba(theme.brightRed.r, theme.brightRed.g, theme.brightRed.b, 0.14)
+                                    : "transparent"
                                 Text {
                                     anchors.centerIn: parent
                                     text: "✕"
                                     color: unpinMa.containsMouse
-                                        ? theme.darkerBackground
+                                        ? theme.brightRed
                                         : theme.darkForeground
                                     font.pixelSize: 12
                                 }
@@ -406,7 +424,7 @@ FloatingWindow {
                 Text {
                     visible: config.pinned.length === 0
                     text: "No pinned apps — add some below."
-                    color: theme.muted
+                    color: theme.mutedText
                     font.pixelSize: 12
                     Layout.bottomMargin: 4
                 }
@@ -423,7 +441,7 @@ FloatingWindow {
                 Rectangle {
                     Layout.fillWidth: true
                     Layout.preferredHeight: 190
-                    radius: 9
+                    radius: 4
                     color: theme.darkerBackground
                     border.color: theme.borderFill
                     border.width: 1
@@ -453,7 +471,7 @@ FloatingWindow {
                             required property var modelData
                             width: appList.width
                             height: 34
-                            radius: 7
+                            radius: 4
                             color: addMa.containsMouse ? theme.hoverFill
                                                        : "transparent"
                             RowLayout {
@@ -478,7 +496,7 @@ FloatingWindow {
                                     Layout.fillWidth: true
                                     text: modelData.name
                                     color: config.isPinned(modelData.id)
-                                        ? theme.muted : theme.foreground
+                                        ? theme.mutedText : theme.foreground
                                     font.pixelSize: 13
                                     elide: Text.ElideRight
                                 }
@@ -487,6 +505,7 @@ FloatingWindow {
                                     text: "pinned"
                                     color: theme.accent
                                     font.pixelSize: 11
+                                    font.family: "JetBrains Mono"
                                 }
                             }
                             MouseArea {
@@ -501,6 +520,30 @@ FloatingWindow {
                     }
                 }
             }
+        }
+    }
+
+    // bottom fade — affordance for the column overflowing the window;
+    // Signal Dark keeps it a gradient, not a scrollbar restyle
+    Rectangle {
+        anchors.left: parent.left
+        anchors.right: parent.right
+        anchors.bottom: parent.bottom
+        height: 32
+        z: 1
+        gradient: Gradient {
+            GradientStop { position: 0.0; color: "transparent" }
+            GradientStop { position: 1.0; color: theme.background }
+        }
+        Text {
+            anchors.horizontalCenter: parent.horizontalCenter
+            anchors.bottom: parent.bottom
+            anchors.bottomMargin: 2
+            text: "▼ scroll"
+            color: theme.mutedText
+            font.pixelSize: 12
+            font.family: "JetBrains Mono"
+            font.letterSpacing: 1.2
         }
     }
 }

@@ -47,11 +47,10 @@ Item {
         anchors.centerIn: parent
         width: root.iconSize + 2
         height: root.iconSize + 2
-        radius: 7
+        radius: 4
         color: mouse.containsMouse ? theme.hoverFill : "transparent"
         border.width: root.urgent ? 2 : 0
         border.color: theme.brightRed
-
         Image {
             id: img
             anchors.centerIn: parent
@@ -62,6 +61,9 @@ Item {
             sourceSize.height: height * 2
             fillMode: Image.PreserveAspectFit
             smooth: true
+            // pinned-but-idle reads dimmer — running/pinned running rows keep
+            // full saturation so the strip scans as: bright = alive, dim = launcher
+            opacity: root.pinned && !root.running ? 0.55 : 1.0
         }
 
         // fallback glyph when no themed icon
@@ -72,6 +74,26 @@ Item {
             color: theme.foreground
             font.pixelSize: root.iconSize * 0.4
             font.bold: true
+            opacity: root.pinned && !root.running ? 0.55 : 1.0
+        }
+    }
+    // hairline between the pinned block and running-only rows — makes the
+    // reorder boundary visible (running rows are not draggable)
+    Rectangle {
+        visible: {
+            if (root.pinned || root.index === 0)
+                return false;
+            const v = root.ListView.view;
+            return v && v.model.get(root.index - 1).pinned;
+        }
+        color: theme.borderFill
+        width: root.vertical ? Math.round(root.iconSize * 0.6) : 1
+        height: root.vertical ? 1 : Math.round(root.iconSize * 0.6)
+        anchors {
+            left: root.vertical ? undefined : root.left
+            top: root.vertical ? root.top : undefined
+            horizontalCenter: root.vertical ? root.horizontalCenter : undefined
+            verticalCenter: root.vertical ? undefined : root.verticalCenter
         }
     }
 

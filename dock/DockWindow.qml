@@ -132,7 +132,7 @@ PanelWindow {
             color: win.config.transparentBackground ? "transparent"
                  : Qt.rgba(theme.background.r, theme.background.g,
                            theme.background.b, 0.85)
-            radius: 16
+            radius: 12
             border.color: theme.borderFill
             border.width: 1
 

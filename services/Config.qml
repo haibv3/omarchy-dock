@@ -10,6 +10,7 @@ QtObject {
     // ---- settings (persisted) ----
     property string position: "bottom"      // top | bottom | left | right
     property string displayMode: "dock"  // dock | menubar
+    property string palette: "signal"      // signal (Signal Dark tokens) | omarchy (host colors.toml)
     property bool enabled: true             // master on/off: dock/widget shown at all
     property bool transparentBackground: false
     // Defaults sized so dock thickness (iconSize + margin*2) equals the
@@ -35,6 +36,7 @@ QtObject {
         _applying = true;
         if (o.position !== undefined) position = o.position;
         if (o.displayMode !== undefined) displayMode = o.displayMode;
+        if (o.palette !== undefined) palette = o.palette;
         if (o.enabled !== undefined) enabled = o.enabled;
         if (o.transparentBackground !== undefined)
             transparentBackground = o.transparentBackground;
@@ -58,6 +60,7 @@ QtObject {
             enabled: enabled,
             transparentBackground: transparentBackground,
             iconSize: iconSize,
+            palette: palette,
             spacing: spacing,
             margin: margin,
             autohide: autohide,
@@ -71,6 +74,7 @@ QtObject {
     onPositionChanged: save()
     onDisplayModeChanged: save()
     onEnabledChanged: save()
+    onPaletteChanged: save()
     onTransparentBackgroundChanged: save()
     onIconSizeChanged: save()
     onSpacingChanged: save()

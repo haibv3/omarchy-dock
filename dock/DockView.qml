@@ -24,13 +24,15 @@ Item {
 
     // Bar widgets are sized from their implicit size, so ListView's content
     // extent cannot determine that size without a circular dependency.
+    readonly property int _emptyHintWidth:
+        !vertical && appModel.model.count === 0 && root.thickness === 0 ? 260 : 0
     implicitWidth: vertical
         ? _thickness
         : appModel.model.count * (iconSize + config.spacing) + config.margin * 2
+          + _emptyHintWidth
     implicitHeight: vertical
         ? appModel.model.count * (iconSize + config.spacing) + config.margin * 2
         : _thickness
-
     // manual reorder state
     property int dragIndex: -1
 
@@ -44,6 +46,19 @@ Item {
         config.setPinnedOrder(ids);
     }
 
+
+    // Empty dock collapses to a margin-only sliver — an undiscoverable 2px
+    // pill. Show a one-line hint instead; hidden on vertical docks (text
+    // can't fit a thickness-wide strip) and bar widgets (thickness > 0).
+    Text {
+        anchors.centerIn: parent
+        visible: !root.vertical && root.appModel.model.count === 0
+                 && root.thickness === 0
+        text: "no apps — open Dock settings to pin"
+        color: theme.mutedText
+        font.pixelSize: 12
+        font.family: "JetBrains Mono"
+    }
     ListView {
         id: view
         anchors.fill: parent

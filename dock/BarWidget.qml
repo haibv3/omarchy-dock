@@ -19,7 +19,7 @@ Item {
     implicitHeight: active ? dockView.implicitHeight : 0
 
     Config { id: config }
-    Theme { id: theme }
+    Theme { id: theme; palette: config.palette }
 
     // Each bar instance owns its settings window state; unlike Globals, this
     // deliberately has no IPC handler, so multi-monitor bars do not duplicate it.
