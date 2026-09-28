@@ -16,6 +16,7 @@ A Quickshell app dock for Omarchy OS (Hyprland/Wayland), with an optional pinned
 - Per-monitor or all-monitors for the dock
 - Drag to reorder pinned apps
 - Right-click menu: focus windows, pin/unpin, close, settings
+- Tabbed settings window (General, Appearance, Behavior, Pinned apps, About) with a live dock preview
 - Follows the active Omarchy theme (`colors.toml`)
 
 ## Requirements
@@ -94,7 +95,7 @@ Copies the dock panel plugin into `~/.config/omarchy/plugins/haibv3.omarchy-dock
 }
 ```
 
-All options are also editable in the GUI: right-click an app icon → *Dock settings…* / *Menubar settings…*.
+All options are also editable in the GUI: right-click an app icon → *Dock settings…* / *Menubar settings…*. The window is split into tabs — **General** (visibility, startup, monitor), **Appearance** (palette, position, icon size, transparent background, with a live preview), **Behavior** (auto-hide mode and delay), **Pinned apps** (pin list and app picker) and **About** (version, host, config file). Pages that only apply to the dock presentation drop out of the sidebar while Menubar is selected.
 
 ## Notes
 

@@ -57,8 +57,9 @@ services/
   signal-dark.tokens.json  Signal Dark W3C token file, read by Theme.qml
   HyprClients.qml          `hyprctl clients -j` geometry for intellihide
   Globals.qml              settingsOpen flag + `dock` IPC target
-settings/SettingsWindow.qml  FloatingWindow settings UI
-ui/D*.qml                  themed controls (Button, Toggle, Slider, Field, Combo, SpinBox, Segmented)
+settings/SettingsWindow.qml  FloatingWindow settings shell: sidebar rail + one pane per tab
+settings/tabs/*.qml          settings pages (General, Appearance, Behavior, Pinned, About)
+ui/D*.qml                  themed controls (Button, Toggle, Slider, Field, Combo, SpinBox, Segmented, NavItem, SectionLabel, SettingRow)
 install.sh, omarchy-dock.sh, omarchy-dock.desktop, assets/
 docs/brainstorm-omarchy-dock.md   original design doc (Vietnamese)
 ```
@@ -66,7 +67,11 @@ docs/brainstorm-omarchy-dock.md   original design doc (Vietnamese)
 ## Commands
 
 ```bash
-# Dev run — Quickshell hot-reloads on save. Dock appears as a layer-shell surface.
+# Dev run. Dock appears as a layer-shell surface.
+# NOTE: this Quickshell build does not pick up QML edits while running — edits
+# to shell.qml or settings/*.qml leave the live instance unchanged (verified by
+# editing a window title and re-reading it from hyprctl). Quit and relaunch
+# after every change: `quickshell ipc -p . call dock quit && quickshell -p .`
 quickshell -p .                      # or: qs -p .
 
 # Quit a standalone instance (IPC resolves the instance by config path)
@@ -206,3 +211,16 @@ Theme (signal-dark.tokens.json, or colors.toml when palette="omarchy") ─→ ev
     `standalone` is false). Plugin: the settings window drives the *plugin's*
     enabled state via `omarchy plugin enable|disable` and reads it back from
     `omarchy plugin list --json` — never mirror it in config.json.
+14. **The settings window is a tiled toplevel, not a floating one.** Hyprland
+    tiles `FloatingWindow` like any other window, so `implicitWidth` /
+    `implicitHeight` / `minimumSize` are ignored and the size follows the
+    workspace layout — 580×615 next to another window on a 1200px-wide screen.
+    The settings layout must therefore work from ~560px up: the sidebar is a
+    fixed 180px and the content pane flexes. It also moves when the dock's
+    exclusive zone changes (toggling the master switch or icon size shifts the
+    window), which is why the settings window is not a good place to measure
+    dock geometry from.
+15. **A `ColumnLayout`'s implicit width is its minimum width**, so
+    `Layout.preferredWidth` alone does not shrink a label column whose text
+    would be wider unwrapped. `ui/DSettingRow.qml` wraps its label block in a
+    plain `Item` for this reason — keep that shape when adding rows.
